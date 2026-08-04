@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carica Excel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="card">
+    <h1>Carica il file Excel</h1>
+    <p>Questa pagina permette di selezionare un file Excel o CSV e leggerlo.</p>
+
+    <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" />
+    <button id="loadButton">Carica file</button>
+    <a href="lista.html">Vedi lista</a>
+    <a href="segna.html">Segna</a>
+
+    <div id="status" class="status">Nessun file caricato.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.1/dist/xlsx.full.min.js"></script>
+  <script src="filtro.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

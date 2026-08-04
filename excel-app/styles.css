@@ -1,0 +1,248 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f4f7fb;
+  color: #111827;
+}
+
+.card {
+  max-width: 900px;
+  margin: 40px auto;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+}
+
+h1 {
+  margin-top: 0;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.toolbar a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.status {
+  margin-top: 12px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.segna-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(240px, 1fr) minmax(280px, 1fr);
+}
+
+.panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.money-panel {
+  margin-bottom: 16px;
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.money-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.money-actions button {
+  background: #b45309;
+  margin-top: 0;
+}
+
+.money-actions button:hover {
+  background: #92400e;
+}
+
+.export-panel {
+  margin-bottom: 16px;
+  background: #ecfeff;
+  border-color: #06b6d4;
+}
+
+.people-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.person-pill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  color: #0f172a;
+  border: 1px solid #dbeafe;
+  padding: 12px 14px;
+  margin-top: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.person-pill:hover,
+.queue-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
+.person-name {
+  font-weight: 700;
+}
+
+.person-meta {
+  font-size: 12px;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.collection-summary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-bottom: 12px;
+}
+
+.collection-card {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #dbeafe;
+  background: white;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+.collection-card.pending {
+  border-color: #f59e0b;
+  background: #fff7ed;
+}
+
+.collection-card.complete {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.collection-name {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.collection-missing {
+  color: #b45309;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.collection-card.complete .collection-missing {
+  color: #15803d;
+}
+
+.collection-meta {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.collection-detail {
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.detail-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.detail-list {
+  display: grid;
+  gap: 8px;
+}
+
+.detail-item {
+  padding: 10px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.detail-name {
+  font-weight: 700;
+}
+
+.detail-phone {
+  font-size: 13px;
+  color: #475569;
+  margin-top: 2px;
+}
+
+.queue {
+  display: grid;
+  gap: 10px;
+  min-height: 240px;
+}
+
+.queue-tile {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #0f172a;
+  font-weight: 700;
+  padding: 12px;
+  margin-top: 0;
+}
+
+.empty-state {
+  padding: 12px;
+  border: 1px dashed #94a3b8;
+  border-radius: 10px;
+  background: white;
+  color: #475569;
+}
+
+@media (max-width: 760px) {
+  .segna-layout {
+    grid-template-columns: 1fr;
+  }
+}

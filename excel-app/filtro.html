@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filtro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="card">
+    <h1>Filtro</h1>
+    <p>Qui puoi filtrare i dati in base a tavolo, allergie o saldo.</p>
+    <a href="lista.html">Torna alla lista</a>
+
+    <div class="toolbar">
+      <button id="filterTavoloBtn">Filtro tavolo</button>
+      <button id="filterAllergieBtn">Filtro allergie</button>
+      <button id="filterSaldoBtn">Filtro saldo</button>
+      <button id="filterRaccoltaBtn">Filtro raccolta</button>
+    </div>
+
+    <div id="filterResult" class="status"></div>
+  </div>
+
+  <script src="filtro.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

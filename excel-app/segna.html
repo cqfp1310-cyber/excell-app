@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Segna</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="card">
+    <div class="toolbar">
+      <h1>Segna</h1>
+      <a href="index.html">Torna alla home</a>
+    </div>
+
+    <p>Seleziona una persona sul lato e poi clicca il quadratino per farlo scorrere verso il basso come una scala mobile.</p>
+
+    <section class="panel money-panel">
+      <h2>Segna soldi</h2>
+      <div class="money-actions">
+        <button id="btnSegnaSaldo">Saldo</button>
+        <button id="btnSegnaTassa">Tassa</button>
+        <button id="btnSegnaPostazione">Postazione</button>
+      </div>
+      <div id="moneyStatus" class="status"></div>
+    </section>
+
+    <section class="panel export-panel">
+      <h2>Salva stato</h2>
+      <button id="btnExportSegna">Salva come nuovo file</button>
+      <div id="exportStatus" class="status"></div>
+    </section>
+
+    <div class="segna-layout">
+      <section class="panel">
+        <h2>Persone da segnare</h2>
+        <div id="personeDisponibili" class="people-list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Scala mobile</h2>
+        <div id="summaryRaccolte" class="collection-summary"></div>
+        <div id="dettaglioRaccolta" class="collection-detail"></div>
+        <div id="codaSegna" class="queue"></div>
+        <div id="segnaStatus" class="status"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="segna.js"></script>
+  <script src="segna-soldi.js"></script>
+  <script src="segna-export.js"></script>
+</body>
+</html>

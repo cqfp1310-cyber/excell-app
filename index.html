@@ -3,24 +3,189 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carica Excel</title>
+  <title>Gestione Excel - Completo</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="card">
-    <h1>Carica il file Excel</h1>
-    <p>Questa pagina permette di selezionare un file Excel o CSV e leggerlo.</p>
+  <div class="app-container">
+    <header class="header-fixed">
+      <h1>Gestione Viaggi</h1>
 
-    <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" />
-    <button id="loadButton">Carica file</button>
-    <a href="lista.html">Vedi lista</a>
-    <a href="segna.html">Segna</a>
+      <div class="toolbar">
+        <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" style="display:none" />
+        <button id="loadButton" onclick="document.getElementById('fileInput').click()">Carica Excel</button>
+        <button id="globalSegnaBtn" disabled>Segna</button>
+        <button id="btnRistorazione" style="background:#f59e0b; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Ristorazione</button>
+        <button id="btnElenchiExtra" style="background:#8b5cf6; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Gestione Elenchi</button>
+        <button id="btnEsportaEsterno" onclick="apriMenuEsportazione()" style="background:#10b981; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Salva / PDF</button>
+        <button id="tempResetBtn" style="background:#ef4444; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Reset Prova</button>
+      </div>
 
-    <div id="status" class="status">Nessun file caricato.</div>
+      <div id="status" class="status-msg">Carica un file per iniziare.</div>
+
+      <!-- Piccolo Riepilogo Generale -->
+      <div id="riepilogoGenerale" class="general-summary-box"></div>
+
+      <!-- Contatori Punti Raccolta -->
+      <div id="contatoriRaccolta" class="counters-container"></div>
+    </header>
+
+    <!-- Lista Nominativi -->
+    <main id="listaDati" class="main-list-scroll">
+      <!-- Qui apparirà la lista: Nome > Raccolta > Telefono > Saldo -->
+    </main>
   </div>
 
+  <!-- Modal WhatsApp/Chiamata -->
+  <div id="phoneModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 id="modalTitle">Nome Contatto</h3>
+      <div class="modal-buttons">
+        <button id="btnWhatsapp" class="btn-choice btn-whatsapp">WhatsApp</button>
+        <button id="btnCall" class="btn-choice btn-call">Chiama</button>
+        <button id="btnCancel" class="btn-choice btn-cancel">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Scelta Operazione -->
+  <div id="statusModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Scegli Cosa Segnare</h3>
+      <p style="font-size:13px; color:#64748b; margin-bottom:15px;">Seleziona lo stato da applicare alla lista.</p>
+      <div class="modal-buttons">
+        <button onclick="impostaStato('Presenza')" class="btn-choice btn-presenza">Presenza</button>
+        <button onclick="impostaStato('Assenza')" class="btn-choice btn-assenza">Assenza</button>
+        <button onclick="chiudiStatusModal()" class="btn-choice btn-cancel">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Lista Mancanti per Punto Raccolta -->
+  <div id="mancantiModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px;">
+      <h3 id="mancantiTitle">Mancanti: Punto</h3>
+      <div id="mancantiList" class="mancanti-scroll-list">
+        <!-- Lista nomi e telefoni -->
+      </div>
+      <button onclick="chiudiMancantiModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Modal Scelta Ristorazione (Tavoli/Intolleranze) -->
+  <div id="ristorazioneChoiceModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Ristorazione</h3>
+      <p style="font-size:13px; color:#64748b; margin-bottom:15px;">Cosa vuoi visualizzare?</p>
+      <div class="modal-buttons">
+        <button onclick="scegliRistorazione('tavoli')" class="btn-choice" style="background:#2563eb; color:white;">Elenco Tavoli</button>
+        <button onclick="scegliRistorazione('intolleranze')" class="btn-choice" style="background:#ef4444; color:white;">Intolleranze</button>
+        <button onclick="chiudiRistorazioneChoiceModal()" class="btn-choice btn-cancel">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Risultato Ristorazione -->
+  <div id="ristorazioneResultModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3 id="ristorazioneResultTitle">Dettaglio</h3>
+      <div id="ristorazioneResultList" class="mancanti-scroll-list">
+        <!-- Risultati dinamici -->
+      </div>
+      <button onclick="chiudiRistorazioneResultModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Modal Pagamenti -->
+  <div id="pagamentiModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3>Gestione Saldi</h3>
+      <div id="totalRimanente" style="background:#f8fafc; padding:10px; border-radius:8px; font-weight:900; color:#059669; margin-bottom:15px; font-size:18px;"></div>
+      <div id="pagamentiList" class="mancanti-scroll-list">
+        <!-- Lista nomi e saldi -->
+      </div>
+      <button onclick="chiudiPagamentiModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Modal Altro Evento -->
+  <div id="eventoExtraModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3>Altro Evento</h3>
+      <div id="eventoExtraCounter"></div>
+      <div id="eventoExtraList" class="mancanti-scroll-list">
+        <!-- Lista nomi e tasti Dentro/Fuori -->
+      </div>
+      <button onclick="chiudiEventoExtraModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Modal Scelta Elenchi Extra -->
+  <div id="elenchiExtraModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Gestione Elenchi</h3>
+      <p style="font-size:13px; color:#64748b; margin-bottom:15px;">Scegli quale elenco gestire.</p>
+      <div class="modal-buttons">
+        <button onclick="apriDaElenchi('pagamenti')" class="btn-choice" style="background:#059669; color:white;">Pagamenti (Saldi)</button>
+        <button onclick="apriDaElenchi('tassa')" class="btn-choice" style="background:#8b5cf6; color:white;">Riscossione Tassa</button>
+        <button onclick="apriDaElenchi('postazioni')" class="btn-choice" style="background:#f59e0b; color:white;">Postazioni</button>
+        <button onclick="apriDaElenchi('altro')" class="btn-choice" style="background:#1e293b; color:white;">Altro Evento</button>
+        <button onclick="chiudiElenchiExtraModal()" class="btn-choice btn-cancel">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Memory Card (Salvataggio Unico) -->
+  <div id="esportazioneModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Memory Card Viaggio</h3>
+      <p style="font-size:12px; color:#64748b; margin-bottom:15px;">Salva tutti i tuoi progressi in un unico file o ricaricali.</p>
+      <div class="modal-buttons">
+        <!-- Salvataggio -->
+        <button onclick="scaricaMemoryCard()" class="btn-choice" style="background:#10b981; color:white;">💾 Salva Progressi</button>
+
+        <!-- Caricamento -->
+        <button onclick="document.getElementById('importMemoryCard').click()" class="btn-choice" style="background:#2563eb; color:white;">📂 Carica Progressi</button>
+        <input type="file" id="importMemoryCard" style="display:none" onchange="caricaMemoryCard(event)" accept=".json">
+
+        <!-- Stampa -->
+        <button onclick="stampaReport()" class="btn-choice" style="background:#64748b; color:white;">🖨️ Stampa Lista / PDF</button>
+
+        <button onclick="chiudiEsportazioneModal()" class="btn-choice btn-cancel">Esci</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tassa -->
+  <div id="tassaModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3>Gestione Tassa</h3>
+      <div id="tassaCounter"></div>
+      <div id="tassaList" class="mancanti-scroll-list"></div>
+      <button onclick="chiudiTassaModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Modal Postazioni -->
+  <div id="postazioniModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3>Gestione Postazioni</h3>
+      <div id="postazioniCounter"></div>
+      <div id="postazioniList" class="mancanti-scroll-list"></div>
+      <button onclick="chiudiPostazioniModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Script nell'ordine corretto -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.1/dist/xlsx.full.min.js"></script>
-  <script src="filtro.js"></script>
+  <script src="segna-presenze.js"></script>
+  <script src="contatore.js"></script>
+  <script src="ristorazione.js"></script>
+  <script src="pagamenti.js"></script>
+  <script src="altro-evento.js"></script>
+  <script src="tassa-gestione.js"></script>
+  <script src="postazioni-gestione.js"></script>
+  <script src="esportazione.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

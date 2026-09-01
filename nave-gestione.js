@@ -12,10 +12,17 @@ function ottieniNaveDati() {
 
 function toggleNave(nome) {
   let naveDati = ottieniNaveDati();
-  if (naveDati[nome]) {
+  if (naveDati[nome] !== undefined) {
     delete naveDati[nome];
   } else {
-    naveDati[nome] = true;
+    const input = prompt(`Quanti passeggeri imbarcare per ${nome}?`, "1");
+    if (input === null) return;
+    const num = parseInt(input);
+    if (isNaN(num) || num < 0) {
+      alert("Inserisci un numero valido.");
+      return;
+    }
+    naveDati[nome] = num;
   }
   localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
   aggiornaUINave();
@@ -40,7 +47,11 @@ function aggiornaUINave() {
   const dati = window.datiInMemoria || [];
   const naveDati = ottieniNaveDati();
 
-  let contImbarcati = Object.keys(naveDati).length;
+  let contImbarcati = 0;
+  Object.values(naveDati).forEach(val => {
+    contImbarcati += (parseInt(val) || 0);
+  });
+
   let passeggeriConTel = [];
   let contTotalePasseggeri = 0;
 
@@ -61,8 +72,8 @@ function aggiornaUINave() {
 
   // Ordine: Da imbarcare in cima, poi alfabetico
   passeggeriConTel.sort((a, b) => {
-    const aDone = naveDati[a.nome];
-    const bDone = naveDati[b.nome];
+    const aDone = naveDati[a.nome] !== undefined;
+    const bDone = naveDati[b.nome] !== undefined;
     if (!aDone && bDone) return -1;
     if (aDone && !bDone) return 1;
     return a.nome.localeCompare(b.nome);
@@ -82,7 +93,8 @@ function aggiornaUINave() {
   `;
 
   const listHtml = passeggeriConTel.map(p => {
-    const isDone = naveDati[p.nome];
+    const numConfermati = naveDati[p.nome];
+    const isDone = numConfermati !== undefined;
     return `
       <div class="pagamento-item ${isDone ? 'pagato-fatto' : ''}">
         <div class="col-check-pago">
@@ -91,12 +103,15 @@ function aggiornaUINave() {
           </button>
         </div>
         <div class="pagamento-nome" style="flex:1;">
-          ${p.nome}
+          ${p.nome} ${isDone ? `<span style="color:#059669; font-weight:bold;">(+${numConfermati})</span>` : ''}
           <div style="font-size:12px; color:#2563eb; font-weight:bold;">📞 ${p.tel}</div>
         </div>
       </div>
     `;
   }).join('');
+
+  listContainer.innerHTML = counterHtml + (listHtml || '<p style="text-align:center; padding:20px; color:#64748b;">Nessun passeggero con telefono trovato.</p>');
+}
 
   listContainer.innerHTML = counterHtml + (listHtml || '<p style="text-align:center; padding:20px; color:#64748b;">Nessun passeggero con telefono trovato.</p>');
 }

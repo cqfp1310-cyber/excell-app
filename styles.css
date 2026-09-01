@@ -46,6 +46,7 @@ h1 { margin: 0; font-size: 22px; color: #0f172a; }
 
 .summary-item.pos { color: #4ade80; }
 .summary-item.neg { color: #f87171; }
+.summary-item.nave { color: #0ea5e9; }
 .summary-item.tot { color: #38bdf8; border-left: 1px solid #475569; padding-left: 10px; }
 
 /* --- CONTATORI --- */
@@ -247,6 +248,7 @@ body.modo-segna-tassa .list-row.stato-tassa .status-square { background: #8b5cf6
 /* Colori specifici per gli indicatori a destra (Storico) */
 .indicator-presenza { background: #22c55e !important; }
 .indicator-assenza { background: #ef4444 !important; }
+.indicator-nave { background: #0ea5e9 !important; }
 .indicator-postazione { background: #f59e0b !important; }
 .indicator-tassa { background: #8b5cf6 !important; }
 

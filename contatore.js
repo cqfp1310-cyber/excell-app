@@ -20,6 +20,9 @@ function aggiornaContatoriRaccolta() {
   let globTot = 0;
   let globPres = 0;
   let globAss = 0;
+  let globNave = 0;
+
+  const naveDati = JSON.parse(localStorage.getItem('excel_nave_checkin') || '{}');
 
   dati.forEach(riga => {
     const nome = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
@@ -47,6 +50,10 @@ function aggiornaContatoriRaccolta() {
 
     if (stati.includes('Presenza')) globPres++;
     if (stati.includes('Assenza')) globAss++;
+
+    if (naveDati[nome] !== undefined) {
+      globNave += naveDati[nome];
+    }
   });
 
   // Aggiorna il piccolo Riepilogo Generale (Solo Passeggeri)
@@ -55,6 +62,7 @@ function aggiornaContatoriRaccolta() {
     summaryBox.innerHTML = `
       <span class="summary-item pos">+${globPres} Presenze</span>
       <span class="summary-item neg">-${globAss} Assenze</span>
+      <span class="summary-item nave" style="background:#0ea5e9; color:white; padding:2px 8px; border-radius:5px; margin:0 5px;">🚢 ${globNave} Nave</span>
       <span class="summary-item tot">${globPres} / ${totReale} (Passeggeri: ${globTot})</span>
     `;
   }

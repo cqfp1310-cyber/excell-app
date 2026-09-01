@@ -111,6 +111,8 @@ window.ottieniStatiPersona = function(nome) {
   if (pagatiTassa.includes(nome)) statiSet.add('Tassa');
   const assegnatiPosto = JSON.parse(localStorage.getItem('excel_postazioni_assegnate') || '[]');
   if (assegnatiPosto.includes(nome)) statiSet.add('Postazione');
+  const naveDati = JSON.parse(localStorage.getItem('excel_nave_checkin') || '{}');
+  if (naveDati[nome] !== undefined) statiSet.add('Nave');
   const adesioniExtra = JSON.parse(localStorage.getItem('excel_adesioni_evento_extra') || '[]');
   if (adesioniExtra.includes(nome)) statiSet.add('Altro');
   return Array.from(statiSet);

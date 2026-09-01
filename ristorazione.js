@@ -20,6 +20,7 @@ function scegliRistorazione(tipo) {
 
 let personeSelezionateTavoli = [];
 let modoSpostaAttivo = false;
+let modoSwitchAttivo = false;
 
 function mostraElencoTavoli() {
   const modal = document.getElementById('ristorazioneResultModal');
@@ -55,16 +56,25 @@ function mostraElencoTavoli() {
   const headerAzioniHtml = `
     <div id="areaAzioniTavoli" style="margin-bottom:20px; text-align:center; background:#f1f5f9; padding:10px; border-radius:12px;">
        <button onclick="mostraOpzioniModificaTavoli()" class="btn-choice" style="background:#8b5cf6; color:white; padding:10px; margin-bottom:0; font-size:14px; width:auto; min-width:120px;">Modifica</button>
-       <div id="opzioniModificaArea" style="display:${modoSpostaAttivo ? 'flex' : 'none'}; margin-top:10px; gap:10px; justify-content:center; flex-wrap:wrap;">
+       <div id="opzioniModificaArea" style="display:${(modoSpostaAttivo || modoSwitchAttivo) ? 'flex' : 'none'}; margin-top:10px; gap:10px; justify-content:center; flex-wrap:wrap;">
           <button onclick="attivaModoSposta()" class="btn-choice" style="background:${modoSpostaAttivo ? '#ef4444' : '#f59e0b'}; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">
-            ${modoSpostaAttivo ? 'Annulla' : 'Sposta'}
+            ${modoSpostaAttivo ? 'Annulla Sposta' : 'Sposta'}
           </button>
-          <button class="btn-choice" style="background:#1e293b; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">Switcha</button>
+          <button onclick="attivaModoSwitch()" class="btn-choice" style="background:${modoSwitchAttivo ? '#ef4444' : '#1e293b'}; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">
+            ${modoSwitchAttivo ? 'Annulla Switch' : 'Switcha'}
+          </button>
 
-          ${personeSelezionateTavoli.length > 0 ? `
+          ${modoSpostaAttivo && personeSelezionateTavoli.length > 0 ? `
             <button onclick="eseguiSpostamentoTavolo()" class="btn-choice" style="background:#22c55e; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:100%; margin-top:10px;">
               Sposta ${personeSelezionateTavoli.length} persone qui...
             </button>
+          ` : ''}
+
+          ${modoSwitchAttivo ? `
+            <div style="width:100%; font-size:12px; color:#64748b; margin-top:5px;">
+              ${personeSelezionateTavoli.length === 0 ? 'Seleziona la prima persona...' :
+                personeSelezionateTavoli.length === 1 ? `Selezionata: <b>${personeSelezionateTavoli[0]}</b>. Seleziona la seconda...` : ''}
+            </div>
           ` : ''}
        </div>
     </div>
@@ -79,10 +89,11 @@ function mostraElencoTavoli() {
       <div style="display:grid; gap:8px;">
         ${tavoli[t].map(nome => {
           const isSelected = personeSelezionateTavoli.includes(nome);
+          const canInteract = modoSpostaAttivo || modoSwitchAttivo;
           return `
             <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:8px 12px; border-radius:8px; border:1px solid ${isSelected ? '#2563eb' : '#e2e8f0'};">
               <div style="font-size:15px; font-weight:500;">• ${nome}</div>
-              ${modoSpostaAttivo ? `
+              ${canInteract ? `
                 <button onclick="toggleSelezionePersonaTavolo('${nome.replace(/'/g, "\\'")}')"
                         style="width:24px; height:24px; border-radius:6px; border:2px solid ${isSelected ? '#2563eb' : '#cbd5e1'};
                                background:${isSelected ? '#2563eb' : 'white'}; cursor:pointer; display:flex; align-items:center; justify-content:center;">
@@ -100,17 +111,44 @@ function mostraElencoTavoli() {
   modal.classList.add('active');
 }
 
+function mostraOpzioniModificaTavoli() {
+  const area = document.getElementById('opzioniModificaArea');
+  if (area) {
+    area.style.display = (area.style.display === 'none' || area.style.display === '') ? 'flex' : 'none';
+  }
+}
+
 function attivaModoSposta() {
   modoSpostaAttivo = !modoSpostaAttivo;
+  modoSwitchAttivo = false;
+  personeSelezionateTavoli = [];
+  mostraElencoTavoli();
+}
+
+function attivaModoSwitch() {
+  modoSwitchAttivo = !modoSwitchAttivo;
+  modoSpostaAttivo = false;
   personeSelezionateTavoli = [];
   mostraElencoTavoli();
 }
 
 function toggleSelezionePersonaTavolo(nome) {
-  if (personeSelezionateTavoli.includes(nome)) {
-    personeSelezionateTavoli = personeSelezionateTavoli.filter(n => n !== nome);
+  if (modoSwitchAttivo) {
+    if (personeSelezionateTavoli.includes(nome)) {
+      personeSelezionateTavoli = [];
+    } else {
+      personeSelezionateTavoli.push(nome);
+      if (personeSelezionateTavoli.length === 2) {
+        eseguiSwitchTavolo();
+        return;
+      }
+    }
   } else {
-    personeSelezionateTavoli.push(nome);
+    if (personeSelezionateTavoli.includes(nome)) {
+      personeSelezionateTavoli = personeSelezionateTavoli.filter(n => n !== nome);
+    } else {
+      personeSelezionateTavoli.push(nome);
+    }
   }
   mostraElencoTavoli();
 }
@@ -122,7 +160,6 @@ function eseguiSpostamentoTavolo() {
   const tavoloPulito = nuovoTavolo.trim().toUpperCase();
   if (tavoloPulito === "") return;
 
-  // Aggiorna dati in memoria
   window.datiInMemoria.forEach(riga => {
     const nome = riga['NOMINATIVO'] || riga['PAX'];
     if (personeSelezionateTavoli.includes(nome)) {
@@ -130,7 +167,6 @@ function eseguiSpostamentoTavolo() {
     }
   });
 
-  // Salva e resetta
   localStorage.setItem('excel_data_store', JSON.stringify(window.datiInMemoria));
   modoSpostaAttivo = false;
   personeSelezionateTavoli = [];
@@ -139,11 +175,33 @@ function eseguiSpostamentoTavolo() {
   if (typeof mostraLista === 'function') mostraLista();
 }
 
-function mostraOpzioniModificaTavoli() {
-  const area = document.getElementById('opzioniModificaArea');
-  if (area) {
-    area.style.display = (area.style.display === 'none' || area.style.display === '') ? 'flex' : 'none';
+function eseguiSwitchTavolo() {
+  const nome1 = personeSelezionateTavoli[0];
+  const nome2 = personeSelezionateTavoli[1];
+
+  let tavolo1 = null;
+  let tavolo2 = null;
+
+  window.datiInMemoria.forEach(riga => {
+    const nome = riga['NOMINATIVO'] || riga['PAX'];
+    if (nome === nome1) tavolo1 = riga['TAVOLO'];
+    if (nome === nome2) tavolo2 = riga['TAVOLO'];
+  });
+
+  if (confirm(`Vuoi scambiare i tavoli tra ${nome1} (Tavolo ${tavolo1}) e ${nome2} (Tavolo ${tavolo2})?`)) {
+    window.datiInMemoria.forEach(riga => {
+      const nome = riga['NOMINATIVO'] || riga['PAX'];
+      if (nome === nome1) riga['TAVOLO'] = tavolo2;
+      else if (nome === nome2) riga['TAVOLO'] = tavolo1;
+    });
+
+    localStorage.setItem('excel_data_store', JSON.stringify(window.datiInMemoria));
   }
+
+  modoSwitchAttivo = false;
+  personeSelezionateTavoli = [];
+  mostraElencoTavoli();
+  if (typeof mostraLista === 'function') mostraLista();
 }
 
 function mostraElencoIntolleranze() {

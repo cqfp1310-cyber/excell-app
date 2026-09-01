@@ -12,12 +12,23 @@ function ottieniNaveDati() {
 
 function toggleNave(nome, defaultPax) {
   let naveDati = ottieniNaveDati();
+
   if (naveDati[nome] !== undefined) {
+    // Se è già presente, lo rimuoviamo
     delete naveDati[nome];
   } else {
-    // Se non c'è, segniamo il numero previsto dal file come base
-    naveDati[nome] = parseInt(defaultPax) || 1;
+    // CHIEDIAMO il numero all'impatto (come richiesto)
+    const input = prompt(`Quanti passeggeri imbarcare per ${nome}?`, defaultPax);
+    if (input === null) return;
+
+    const num = parseInt(input);
+    if (isNaN(num) || num < 0) {
+      alert("Inserisci un numero valido.");
+      return;
+    }
+    naveDati[nome] = num;
   }
+
   localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
   aggiornaUINave();
   if (typeof mostraLista === 'function') mostraLista();

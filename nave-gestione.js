@@ -1,52 +1,63 @@
 /**
  * File: nave-gestione.js
- * Gestisce l'imbarco sulla Nave.
- * Permette di segnare quanti passeggeri effettivamente salgono per ogni gruppo.
+ * Gestione avanzata imbarco nave
  */
 
 const NAVE_LOCAL_KEY = 'excel_nave_checkin';
+window.filtroNave = '';
 
 function ottieniNaveDati() {
   const dati = localStorage.getItem(NAVE_LOCAL_KEY);
   return dati ? JSON.parse(dati) : {};
 }
 
-function toggleNave(nome, defaultPax) {
+function confermaRapidaNave(nome, num) {
   let naveDati = ottieniNaveDati();
-
-  if (naveDati[nome] !== undefined) {
-    // Se è già presente, lo rimuoviamo (toggle off)
-    delete naveDati[nome];
-  } else {
-    // Chiediamo conferma del numero di passeggeri
-    const input = prompt(`Quanti passeggeri imbarcare per ${nome}?`, defaultPax);
-    if (input === null) return; // Annullato
-
-    const num = parseInt(input);
-    if (isNaN(num) || num < 0) {
-      alert("Inserisci un numero valido.");
-      return;
-    }
-    naveDati[nome] = num;
-  }
-
+  naveDati[nome] = num;
   localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
-  apriNaveGestione(); // Rinfresca la lista interna
-  if (typeof mostraLista === 'function') mostraLista(); // Aggiorna lista principale
+  aggiornaUINave();
+}
+
+function cancellaNave(nome) {
+  let naveDati = ottieniNaveDati();
+  delete naveDati[nome];
+  localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
+  aggiornaUINave();
+}
+
+function modificaManualeNave(nome, attuale) {
+  const input = prompt(`Inserisci numero passeggeri per ${nome}:`, attuale);
+  if (input === null) return;
+  const num = parseInt(input);
+  if (!isNaN(num) && num >= 0) {
+    confermaRapidaNave(nome, num);
+  }
 }
 
 function apriNaveGestione() {
-  const modal = document.getElementById('naveModal');
+  window.filtroNave = '';
+  const searchInput = document.getElementById('naveSearchInput');
+  if (searchInput) {
+    searchInput.value = '';
+    searchInput.oninput = (e) => {
+      window.filtroNave = e.target.value.toLowerCase();
+      aggiornaUINave();
+    };
+  }
+  aggiornaUINave();
+  document.getElementById('naveModal').classList.add('active');
+}
+
+function aggiornaUINave() {
   const listContainer = document.getElementById('naveList');
   const counterBox = document.getElementById('naveCounter');
-
-  if (!modal || !listContainer) return;
+  if (!listContainer) return;
 
   const dati = window.datiInMemoria || [];
   const naveDati = ottieniNaveDati();
 
-  let totaleImbarcati = 0;
-  let totalePrevisti = 0;
+  let totImbarcati = 0;
+  let totPrevisti = 0;
   let gruppiImbarcati = 0;
   let passeggeriReali = [];
 
@@ -57,16 +68,18 @@ function apriNaveGestione() {
     const isStaff = nome.toUpperCase().includes('AUTISTA') || nome.toUpperCase().includes('ACCOMPAGNATORE');
 
     if (nome && !isTotale && !isStaff) {
-      passeggeriReali.push({ nome, paxPrevisti });
-      totalePrevisti += paxPrevisti;
+      if (nome.toLowerCase().includes(window.filtroNave)) {
+        passeggeriReali.push({ nome, paxPrevisti });
+      }
+      totPrevisti += paxPrevisti;
       if (naveDati[nome] !== undefined) {
-        totaleImbarcati += naveDati[nome];
+        totImbarcati += naveDati[nome];
         gruppiImbarcati++;
       }
     }
   });
 
-  // Ordinamento: Imbarcati (Verde) in fondo, Da imbarcare in cima
+  // Ordine: Da imbarcare in cima
   passeggeriReali.sort((a, b) => {
     const aIn = naveDati[a.nome] !== undefined;
     const bIn = naveDati[b.nome] !== undefined;
@@ -75,40 +88,45 @@ function apriNaveGestione() {
     return a.nome.localeCompare(b.nome);
   });
 
-  const html = passeggeriReali.map(p => {
-    const numImbarcati = naveDati[p.nome];
-    const isDone = numImbarcati !== undefined;
+  listContainer.innerHTML = passeggeriReali.map(p => {
+    const numConfermato = naveDati[p.nome];
+    const isDone = numConfermato !== undefined;
+
     return `
-      <div class="pagamento-item ${isDone ? 'pagato-fatto' : ''}">
-        <div class="col-check-pago">
-          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}', ${p.paxPrevisti}); event.stopPropagation();">
-            ${isDone ? 'IMBARCATO' : 'DA IMBARC.'}
-          </button>
+      <div class="pagamento-item" style="border-left: 5px solid ${isDone ? '#0ea5e9' : '#e2e8f0'}; margin-bottom:8px; background: ${isDone ? '#f0f9ff' : 'white'};">
+        <div style="flex:1;">
+          <div style="font-weight:bold; font-size:15px;">${p.nome}</div>
+          <div style="font-size:12px; color:#64748b;">Previsti: ${p.paxPrevisti} PAX</div>
+          ${isDone ? `<div style="font-weight:bold; color:#0369a1; font-size:13px;">Imbarcati: ${numConfermato}</div>` : ''}
         </div>
-        <div class="pagamento-nome" style="flex:1;">
-          ${p.nome} <span style="font-size:12px; color:#64748b;">(${p.paxPrevisti} PAX)</span>
-          ${isDone ? `<br><small style="color:#059669;">Confermati: <strong>${numImbarcati}</strong></small>` : ''}
+        <div style="display:flex; gap:5px;">
+          ${!isDone ? `
+            <button onclick="confermaRapidaNave('${p.nome.replace(/'/g, "\\")}', ${p.paxPrevisti})" style="background:#0ea5e9; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">OK ${p.paxPrevisti}</button>
+            <button onclick="modificaManualeNave('${p.nome.replace(/'/g, "\\")}', ${p.paxPrevisti})" style="background:#f1f5f9; border:none; padding:8px; border-radius:6px; cursor:pointer;">✏️</button>
+          ` : `
+            <button onclick="cancellaNave('${p.nome.replace(/'/g, "\\")}')" style="background:#ef4444; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">ANNULLA</button>
+            <button onclick="modificaManualeNave('${p.nome.replace(/'/g, "\\")}', ${numConfermato})" style="background:#f1f5f9; border:none; padding:8px; border-radius:6px; cursor:pointer;">✏️</button>
+          `}
         </div>
       </div>
     `;
-  }).join('');
-
-  listContainer.innerHTML = html || '<p style="text-align:center; padding:20px;">Carica un file per vedere i nomi.</p>';
+  }).join('') || '<p style="text-align:center; padding:20px; color:#94a3b8;">Nessun passeggero trovato.</p>';
 
   if (counterBox) {
     counterBox.innerHTML = `
-      <div style="display:flex; justify-content:space-around; align-items:center; padding:10px; background:#0ea5e9; color:white; border-radius:10px; margin-bottom:15px;">
-        <div style="text-align:center;"><span style="color:#ffffff; font-size:20px; font-weight:900;">${totaleImbarcati}</span><br><small>IMBARCATI</small></div>
-        <div style="text-align:center; border-left:1px solid #7dd3fc; border-right:1px solid #7dd3fc; padding:0 20px;"><span style="color:#e0f2fe; font-size:16px;">${totalePrevisti}</span><br><small>PREVISTI</small></div>
-        <div style="text-align:center;"><span style="color:#ffffff; font-size:20px; font-weight:900;">${gruppiImbarcati}</span><br><small>GRUPPI</small></div>
+      <div style="display:flex; justify-content:space-around; align-items:center; padding:12px; background:#0ea5e9; color:white; border-radius:12px; margin-bottom:15px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+        <div style="text-align:center;"><span style="font-size:22px; font-weight:900;">${totImbarcati}</span><br><small style="text-transform:uppercase; font-size:10px; opacity:0.8;">A Bordo</small></div>
+        <div style="height:30px; border-left:1px solid rgba(255,255,255,0.3);"></div>
+        <div style="text-align:center;"><span style="font-size:18px; font-weight:600; opacity:0.9;">${totPrevisti}</span><br><small style="text-transform:uppercase; font-size:10px; opacity:0.8;">Totali</small></div>
+        <div style="height:30px; border-left:1px solid rgba(255,255,255,0.3);"></div>
+        <div style="text-align:center;"><span style="font-size:22px; font-weight:900;">${gruppiImbarcati}</span><br><small style="text-transform:uppercase; font-size:10px; opacity:0.8;">Gruppi</small></div>
       </div>
     `;
   }
 
-  modal.classList.add('active');
+  if (typeof mostraLista === 'function') mostraLista();
 }
 
 function chiudiNaveModal() {
-  const modal = document.getElementById('naveModal');
-  if (modal) modal.classList.remove('active');
+  document.getElementById('naveModal').classList.remove('active');
 }

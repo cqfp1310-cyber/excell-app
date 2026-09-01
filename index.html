@@ -185,7 +185,10 @@
       <div id="naveList" class="mancanti-scroll-list">
         <p style="text-align:center; padding:20px;">Qui apparirà la lista imbarco...</p>
       </div>
-      <button onclick="chiudiNaveModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+      <div class="modal-buttons" style="margin-top:15px; display:flex; gap:10px;">
+        <button onclick="resetNave()" class="btn-choice" style="background:#ef4444; color:white; flex:1; margin-bottom:0;">Reset Nave</button>
+        <button onclick="chiudiNaveModal()" class="btn-choice btn-cancel" style="flex:1; margin-bottom:0;">Chiudi</button>
+      </div>
     </div>
   </div>
 

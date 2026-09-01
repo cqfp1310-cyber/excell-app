@@ -58,6 +58,14 @@ function chiudiNaveModal() {
   if (modal) modal.classList.remove('active');
 }
 
+function resetNave() {
+  if (confirm("Sei sicuro di voler resettare tutti i dati di imbarco della nave?")) {
+    localStorage.removeItem(NAVE_LOCAL_KEY);
+    aggiornaUINave();
+    if (typeof mostraLista === 'function') mostraLista();
+  }
+}
+
 function aggiornaUINave() {
   const listContainer = document.getElementById('naveList');
   if (!listContainer) return;

@@ -18,6 +18,9 @@ function scegliRistorazione(tipo) {
   }
 }
 
+let personeSelezionateTavoli = [];
+let modoSpostaAttivo = false;
+
 function mostraElencoTavoli() {
   const modal = document.getElementById('ristorazioneResultModal');
   const title = document.getElementById('ristorazioneResultTitle');
@@ -38,7 +41,6 @@ function mostraElencoTavoli() {
     tavoli[tavolo].push(nome);
   });
 
-  // Ordiniamo i numeri di tavolo
   const chiaviOrdinate = Object.keys(tavoli).sort((a, b) => {
     const numA = parseInt(a);
     const numB = parseInt(b);
@@ -53,9 +55,17 @@ function mostraElencoTavoli() {
   const headerAzioniHtml = `
     <div id="areaAzioniTavoli" style="margin-bottom:20px; text-align:center; background:#f1f5f9; padding:10px; border-radius:12px;">
        <button onclick="mostraOpzioniModificaTavoli()" class="btn-choice" style="background:#8b5cf6; color:white; padding:10px; margin-bottom:0; font-size:14px; width:auto; min-width:120px;">Modifica</button>
-       <div id="opzioniModificaArea" style="display:none; margin-top:10px; gap:10px; justify-content:center;">
-          <button class="btn-choice" style="background:#f59e0b; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">Sposta</button>
+       <div id="opzioniModificaArea" style="display:${modoSpostaAttivo ? 'flex' : 'none'}; margin-top:10px; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button onclick="attivaModoSposta()" class="btn-choice" style="background:${modoSpostaAttivo ? '#ef4444' : '#f59e0b'}; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">
+            ${modoSpostaAttivo ? 'Annulla' : 'Sposta'}
+          </button>
           <button class="btn-choice" style="background:#1e293b; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">Switcha</button>
+
+          ${personeSelezionateTavoli.length > 0 ? `
+            <button onclick="eseguiSpostamentoTavolo()" class="btn-choice" style="background:#22c55e; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:100%; margin-top:10px;">
+              Sposta ${personeSelezionateTavoli.length} persone qui...
+            </button>
+          ` : ''}
        </div>
     </div>
   `;
@@ -66,14 +76,67 @@ function mostraElencoTavoli() {
         <div style="font-weight:900; font-size:18px; color:#1e293b;">TAVOLO ${t}</div>
         <div style="background:#2563eb; color:white; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:bold;">${tavoli[t].length} PERSONE</div>
       </div>
-      <div style="display:grid; gap:5px;">
-        ${tavoli[t].map(nome => `<div style="font-size:15px;">• ${nome}</div>`).join('')}
+      <div style="display:grid; gap:8px;">
+        ${tavoli[t].map(nome => {
+          const isSelected = personeSelezionateTavoli.includes(nome);
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:white; padding:8px 12px; border-radius:8px; border:1px solid ${isSelected ? '#2563eb' : '#e2e8f0'};">
+              <div style="font-size:15px; font-weight:500;">• ${nome}</div>
+              ${modoSpostaAttivo ? `
+                <button onclick="toggleSelezionePersonaTavolo('${nome.replace(/'/g, "\\'")}')"
+                        style="width:24px; height:24px; border-radius:6px; border:2px solid ${isSelected ? '#2563eb' : '#cbd5e1'};
+                               background:${isSelected ? '#2563eb' : 'white'}; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                  ${isSelected ? '✅' : ''}
+                </button>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
       </div>
     </div>
   `).join('');
 
   listContainer.innerHTML = headerAzioniHtml + tavoliHtml;
   modal.classList.add('active');
+}
+
+function attivaModoSposta() {
+  modoSpostaAttivo = !modoSpostaAttivo;
+  personeSelezionateTavoli = [];
+  mostraElencoTavoli();
+}
+
+function toggleSelezionePersonaTavolo(nome) {
+  if (personeSelezionateTavoli.includes(nome)) {
+    personeSelezionateTavoli = personeSelezionateTavoli.filter(n => n !== nome);
+  } else {
+    personeSelezionateTavoli.push(nome);
+  }
+  mostraElencoTavoli();
+}
+
+function eseguiSpostamentoTavolo() {
+  const nuovoTavolo = prompt(`A quale tavolo vuoi spostare le ${personeSelezionateTavoli.length} persone selezionate?`);
+  if (nuovoTavolo === null) return;
+
+  const tavoloPulito = nuovoTavolo.trim().toUpperCase();
+  if (tavoloPulito === "") return;
+
+  // Aggiorna dati in memoria
+  window.datiInMemoria.forEach(riga => {
+    const nome = riga['NOMINATIVO'] || riga['PAX'];
+    if (personeSelezionateTavoli.includes(nome)) {
+      riga['TAVOLO'] = tavoloPulito;
+    }
+  });
+
+  // Salva e resetta
+  localStorage.setItem('excel_data_store', JSON.stringify(window.datiInMemoria));
+  modoSpostaAttivo = false;
+  personeSelezionateTavoli = [];
+
+  mostraElencoTavoli();
+  if (typeof mostraLista === 'function') mostraLista();
 }
 
 function mostraOpzioniModificaTavoli() {

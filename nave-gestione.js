@@ -126,6 +126,3 @@ function aggiornaUINave() {
 
   listContainer.innerHTML = counterHtml + (listHtml || '<p style="text-align:center; padding:20px; color:#64748b;">Nessun passeggero con telefono trovato.</p>');
 }
-
-  listContainer.innerHTML = counterHtml + (listHtml || '<p style="text-align:center; padding:20px; color:#64748b;">Nessun passeggero con telefono trovato.</p>');
-}

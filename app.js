@@ -111,8 +111,6 @@ window.ottieniStatiPersona = function(nome) {
   if (pagatiTassa.includes(nome)) statiSet.add('Tassa');
   const assegnatiPosto = JSON.parse(localStorage.getItem('excel_postazioni_assegnate') || '[]');
   if (assegnatiPosto.includes(nome)) statiSet.add('Postazione');
-  const naveDati = JSON.parse(localStorage.getItem('excel_nave_checkin') || '{}');
-  if (naveDati[nome] !== undefined) statiSet.add('Nave');
   const adesioniExtra = JSON.parse(localStorage.getItem('excel_adesioni_evento_extra') || '[]');
   if (adesioniExtra.includes(nome)) statiSet.add('Altro');
   return Array.from(statiSet);
@@ -183,7 +181,6 @@ if (btnElenchiExtra) {
 
 window.apriDaElenchi = function(tipo) {
   chiudiElenchiExtraModal();
-  if (tipo === 'nave' && typeof apriNaveGestione === 'function') apriNaveGestione();
   if (tipo === 'pagamenti' && typeof apriPagamenti === 'function') apriPagamenti();
   if (tipo === 'tassa' && typeof apriTassaGestione === 'function') apriTassaGestione();
   if (tipo === 'postazioni' && typeof apriPostazioniGestione === 'function') apriPostazioniGestione();
@@ -193,7 +190,7 @@ window.apriDaElenchi = function(tipo) {
 window.chiudiElenchiExtraModal = function() { document.getElementById('elenchiExtraModal').classList.remove('active'); };
 
 const tempResetBtn = document.getElementById('tempResetBtn');
-if (tempResetBtn) tempResetBtn.addEventListener('click', () => { if (confirm('Reset?')) { localStorage.removeItem('excel_stati_persone_v2'); localStorage.removeItem('excel_pagamenti_ricevuti'); localStorage.removeItem('excel_adesioni_evento_extra'); localStorage.removeItem('excel_tassa_pagata'); localStorage.removeItem('excel_postazioni_assegnate'); location.reload(); } });
+if (tempResetBtn) tempResetBtn.addEventListener('click', () => { if (confirm('Reset?')) { localStorage.removeItem('excel_stati_persone_v2'); localStorage.removeItem('excel_pagamenti_ricevuti'); localStorage.removeItem('excel_adesioni_evento_extra'); localStorage.removeItem('excel_tassa_pagata'); localStorage.removeItem('excel_postazioni_assegnate'); localStorage.removeItem('excel_nave_checkin'); location.reload(); } });
 
 // Logica Telefono
 const phoneModal = document.getElementById('phoneModal');

@@ -4,14 +4,23 @@ window.filtroRicerca = '';
 
 const fileInput = document.getElementById('fileInput');
 const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
 const statusEl = document.getElementById('status');
 const listaDatiEl = document.getElementById('listaDati');
 const globalSegnaBtn = document.getElementById('globalSegnaBtn');
 
 // Listener Ricerca
 if (searchInput) {
-  searchInput.addEventListener('input', (e) => {
-    window.filtroRicerca = e.target.value.toLowerCase();
+  searchInput.addEventListener('input', () => {
+    window.filtroRicerca = searchInput.value.toLowerCase().trim();
+    mostraLista();
+  });
+}
+
+if (clearSearchBtn) {
+  clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    window.filtroRicerca = '';
     mostraLista();
   });
 }
@@ -134,8 +143,19 @@ function mostraLista() {
     const nomeOriginale = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
     const isTotale = nomeOriginale === '' || String(riga['PAX']).includes('###');
     if (isTotale) return true;
-    return nomeOriginale.toLowerCase().includes(window.filtroRicerca);
+
+    // Se non c'è filtro, mostra tutto
+    if (!window.filtroRicerca) return true;
+
+    // Filtro per nome o per telefono (utile!)
+    const tel = String(riga['TELEFONO'] || '').toLowerCase();
+    return nomeOriginale.toLowerCase().includes(window.filtroRicerca) || tel.includes(window.filtroRicerca);
   });
+
+  if (datiFiltrati.length === 0 && window.filtroRicerca) {
+    listaDatiEl.innerHTML = toolbarHtml + headerHtml + `<div style="text-align:center; padding:40px; color:#64748b;"> Nessun risultato per "<strong>${window.filtroRicerca}</strong>"</div>`;
+    return;
+  }
 
   const rowsHtml = datiFiltrati.map((riga, index) => {
     const nomeOriginale = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();

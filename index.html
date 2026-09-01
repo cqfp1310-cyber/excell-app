@@ -12,7 +12,6 @@
       <h1>Gestione Viaggi</h1>
 
       <div class="toolbar">
-        <input id="searchInput" type="text" placeholder="🔍 Cerca nome..." style="padding:10px; border-radius:8px; border:1px solid #cbd5e1; outline:none; font-size:14px; flex-grow:1; min-width:120px;" />
         <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" style="display:none" />
         <button id="loadButton" onclick="document.getElementById('fileInput').click()">Carica Excel</button>
         <button id="globalSegnaBtn" disabled>Segna</button>
@@ -20,6 +19,11 @@
         <button id="btnElenchiExtra" style="background:#8b5cf6; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Gestione Elenchi</button>
         <button id="btnEsportaEsterno" onclick="apriMenuEsportazione()" style="background:#10b981; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Salva / PDF</button>
         <button id="tempResetBtn" style="background:#ef4444; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Reset Prova</button>
+      </div>
+
+      <div class="search-container" style="margin-top:15px; display:flex; gap:10px;">
+        <input id="searchInput" type="text" placeholder="🔍 Cerca un nome..." style="flex:1; padding:12px; border-radius:10px; border:2px solid #e2e8f0; outline:none; font-size:16px; font-weight:600;" />
+        <button id="clearSearchBtn" style="padding:10px 15px; background:#f1f5f9; border:none; border-radius:10px; cursor:pointer; font-weight:bold; color:#64748b;">X</button>
       </div>
 
       <div id="status" class="status-msg">Carica un file per iniziare.</div>

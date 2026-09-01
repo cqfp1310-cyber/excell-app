@@ -109,8 +109,8 @@ window.ottieniStatiPersona = function(nome) {
   if (baseStati[nome]) baseStati[nome].forEach(s => statiSet.add(s));
   const pagatiTassa = JSON.parse(localStorage.getItem('excel_tassa_pagata') || '[]');
   if (pagatiTassa.includes(nome)) statiSet.add('Tassa');
-  const assegnatiPosto = JSON.parse(localStorage.getItem('excel_postazioni_assegnate') || '[]');
-  if (assegnatiPosto.includes(nome)) statiSet.add('Postazione');
+  const assegnatiPostoV2 = JSON.parse(localStorage.getItem('excel_postazioni_assegnate_v2') || '[]');
+  if (assegnatiPostoV2.some(p => p.nome === nome)) statiSet.add('Postazione');
   const adesioniExtra = JSON.parse(localStorage.getItem('excel_adesioni_evento_extra') || '[]');
   if (adesioniExtra.includes(nome)) statiSet.add('Altro');
   return Array.from(statiSet);
@@ -191,7 +191,7 @@ window.apriDaElenchi = function(tipo) {
 window.chiudiElenchiExtraModal = function() { document.getElementById('elenchiExtraModal').classList.remove('active'); };
 
 const tempResetBtn = document.getElementById('tempResetBtn');
-if (tempResetBtn) tempResetBtn.addEventListener('click', () => { if (confirm('Reset?')) { localStorage.removeItem('excel_stati_persone_v2'); localStorage.removeItem('excel_pagamenti_ricevuti'); localStorage.removeItem('excel_adesioni_evento_extra'); localStorage.removeItem('excel_tassa_pagata'); localStorage.removeItem('excel_postazioni_assegnate'); localStorage.removeItem('excel_nave_checkin'); location.reload(); } });
+if (tempResetBtn) tempResetBtn.addEventListener('click', () => { if (confirm('Reset?')) { localStorage.removeItem('excel_stati_persone_v2'); localStorage.removeItem('excel_pagamenti_ricevuti'); localStorage.removeItem('excel_adesioni_evento_extra'); localStorage.removeItem('excel_tassa_pagata'); localStorage.removeItem('excel_postazioni_assegnate_v2'); localStorage.removeItem('excel_nave_checkin'); location.reload(); } });
 
 // Logica Telefono
 const phoneModal = document.getElementById('phoneModal');

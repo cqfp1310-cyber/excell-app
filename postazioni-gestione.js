@@ -1,25 +1,46 @@
 /**
  * File: postazioni-gestione.js
- * Gestisce le Postazioni (Rosso: Da fare, Verde: Fatto)
+ * Gestione Manuale Postazioni
  */
 
-const POSTO_LOCAL_KEY = 'excel_postazioni_assegnate';
+const POSTO_LOCAL_KEY = 'excel_postazioni_assegnate_v2';
 
 function ottieniPostazioniAssegnate() {
   const dati = localStorage.getItem(POSTO_LOCAL_KEY);
   return dati ? JSON.parse(dati) : [];
 }
 
-function togglePostazione(nome) {
+function aggiungiPostazione() {
+  const nome = prompt("Inserisci il Nome (o capogruppo):");
+  if (!nome) return;
+
+  const pax = prompt("Numero di persone (PAX):", "1");
+  if (pax === null) return;
+
+  const fila = prompt("Fila assegnata:");
+  if (fila === null) return;
+
   let assegnati = ottieniPostazioniAssegnate();
-  if (assegnati.includes(nome)) {
-    assegnati = assegnati.filter(n => n !== nome);
-  } else {
-    assegnati.push(nome);
-  }
+  assegnati.push({
+    nome: nome.trim(),
+    pax: pax.trim(),
+    fila: fila.trim(),
+    timestamp: Date.now()
+  });
+
   localStorage.setItem(POSTO_LOCAL_KEY, JSON.stringify(assegnati));
   apriPostazioniGestione();
   if (typeof mostraLista === 'function') mostraLista();
+}
+
+function rimuoviPostazione(index) {
+  if (confirm("Vuoi rimuovere questa assegnazione?")) {
+    let assegnati = ottieniPostazioniAssegnate();
+    assegnati.splice(index, 1);
+    localStorage.setItem(POSTO_LOCAL_KEY, JSON.stringify(assegnati));
+    apriPostazioniGestione();
+    if (typeof mostraLista === 'function') mostraLista();
+  }
 }
 
 function apriPostazioniGestione() {
@@ -29,58 +50,39 @@ function apriPostazioniGestione() {
 
   if (!modal || !listContainer) return;
 
-  const dati = window.datiInMemoria || [];
   const assegnati = ottieniPostazioniAssegnate();
-
-  let contOk = 0;
-  let contNo = 0;
-  let passeggeriReali = [];
-
-  dati.forEach(riga => {
-    const nome = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
-    const isTotale = !nome || String(riga['PAX']).includes('###');
-    const isStaff = nome.toUpperCase().includes('AUTISTA') || nome.toUpperCase().includes('ACCOMPAGNATORE');
-
-    if (nome && !isTotale && !isStaff) {
-      passeggeriReali.push(nome);
-      if (assegnati.includes(nome)) contOk++;
-      else contNo++;
-    }
-  });
-
-  passeggeriReali.sort((a, b) => {
-    const aIn = assegnati.includes(a);
-    const bIn = assegnati.includes(b);
-    if (!aIn && bIn) return -1;
-    if (aIn && !bIn) return 1;
-    return a.localeCompare(b);
-  });
-
-  const html = passeggeriReali.map(nome => {
-    const isDone = assegnati.includes(nome);
-    return `
-      <div class="pagamento-item ${isDone ? 'pagato-fatto' : ''}">
-        <div class="col-check-pago">
-          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="togglePostazione('${nome.replace(/'/g, "\\'")}'); event.stopPropagation();">
-            ${isDone ? 'OK' : 'DA FARE'}
-          </button>
-        </div>
-        <div class="pagamento-nome" style="flex:1;">${nome}</div>
-      </div>
-    `;
-  }).join('');
-
-  listContainer.innerHTML = html;
 
   if (counterBox) {
     counterBox.innerHTML = `
-      <div style="display:flex; justify-content:space-around; align-items:center; padding:10px; background:#1e293b; color:white; border-radius:10px; margin-bottom:15px;">
-        <div style="text-align:center;"><span style="color:#4ade80; font-size:20px; font-weight:900;">${contOk}</span><br><small>FATTO</small></div>
-        <div style="text-align:center; border-left:1px solid #475569; border-right:1px solid #475569; padding:0 20px;"><span style="color:#94a3b8; font-size:16px;">${passeggeriReali.length}</span><br><small>TOTALE</small></div>
-        <div style="text-align:center;"><span style="color:#f87171; font-size:20px; font-weight:900;">${contNo}</span><br><small>DA FARE</small></div>
+      <div style="display:flex; justify-content:center; align-items:center; padding:15px; background:#0f172a; color:white; border-radius:12px; margin-bottom:15px; border: 1px solid #334155;">
+        <div style="text-align:center;">
+          <span style="color:#f59e0b; font-size:24px; font-weight:900;">${assegnati.length}</span><br>
+          <small style="color:#94a3b8; font-size:10px; text-transform:uppercase; letter-spacing:1px;">Postazioni Totali</small>
+        </div>
       </div>
+      <button onclick="aggiungiPostazione()" class="btn-choice" style="background:#22c55e; color:white; margin-bottom:20px; font-size:16px;">
+        ➕ Aggiungi Postazione
+      </button>
     `;
   }
+
+  if (assegnati.length === 0) {
+    listContainer.innerHTML = '<p style="text-align:center; padding:30px; color:#64748b; font-style:italic;">Nessuna postazione assegnata.<br>Clicca il tasto "+" per iniziare.</p>';
+  } else {
+    listContainer.innerHTML = assegnati.map((p, idx) => `
+      <div class="pagamento-item" style="display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px solid #f1f5f9; background:white; border-radius:10px; margin-bottom:8px; border:1px solid #e2e8f0;">
+        <div style="flex:1;">
+          <div style="font-weight:900; font-size:16px; color:#1e293b;">${p.nome}</div>
+          <div style="font-size:13px; color:#64748b; margin-top:3px;">
+            <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold; color:#f59e0b;">PAX: ${p.pax}</span>
+            <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold; color:#2563eb; margin-left:5px;">FILA: ${p.fila}</span>
+          </div>
+        </div>
+        <button onclick="rimuoviPostazione(${idx})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:12px;">ELIMINA</button>
+      </div>
+    `).join('');
+  }
+
   modal.classList.add('active');
 }
 

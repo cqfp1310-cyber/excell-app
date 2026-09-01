@@ -14,7 +14,7 @@ function scaricaMemoryCard() {
     stati: JSON.parse(localStorage.getItem('excel_stati_persone_v2') || '{}'),
     pagamenti: JSON.parse(localStorage.getItem('excel_pagamenti_ricevuti') || '[]'),
     tassa: JSON.parse(localStorage.getItem('excel_tassa_pagata') || '[]'),
-    postazioni: JSON.parse(localStorage.getItem('excel_postazioni_assegnate') || '[]'),
+    postazioni: JSON.parse(localStorage.getItem('excel_postazioni_assegnate_v2') || '[]'),
     extra: JSON.parse(localStorage.getItem('excel_adesioni_evento_extra') || '[]')
   };
 
@@ -47,7 +47,7 @@ function caricaMemoryCard(event) {
         localStorage.setItem('excel_stati_persone_v2', JSON.stringify(card.stati || {}));
         localStorage.setItem('excel_pagamenti_ricevuti', JSON.stringify(card.pagamenti || []));
         localStorage.setItem('excel_tassa_pagata', JSON.stringify(card.tassa || []));
-        localStorage.setItem('excel_postazioni_assegnate', JSON.stringify(card.postazioni || []));
+        localStorage.setItem('excel_postazioni_assegnate_v2', JSON.stringify(card.postazioni || []));
         localStorage.setItem('excel_adesioni_evento_extra', JSON.stringify(card.extra || []));
 
         alert('Memory Card caricata! Tutti i progressi sono stati ripristinati. ✅');

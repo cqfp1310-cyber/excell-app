@@ -62,7 +62,7 @@ function aggiornaContatoriRaccolta() {
     summaryBox.innerHTML = `
       <span class="summary-item pos">+${globPres} Presenze</span>
       <span class="summary-item neg">-${globAss} Assenze</span>
-      <span class="summary-item nave" style="background:#0ea5e9; color:white; padding:2px 8px; border-radius:5px; margin:0 5px;">🚢 ${globNave} Nave</span>
+      <span class="summary-item nave">🚢 ${globNave} Nave</span>
       <span class="summary-item tot">${globPres} / ${totReale} (Passeggeri: ${globTot})</span>
     `;
   }

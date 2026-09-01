@@ -1,29 +1,10 @@
 const STORAGE_KEY = 'excel_data_store';
 window.datiInMemoria = [];
-window.filtroRicerca = '';
 
 const fileInput = document.getElementById('fileInput');
-const searchInput = document.getElementById('searchInput');
-const clearSearchBtn = document.getElementById('clearSearchBtn');
 const statusEl = document.getElementById('status');
 const listaDatiEl = document.getElementById('listaDati');
 const globalSegnaBtn = document.getElementById('globalSegnaBtn');
-
-// Listener Ricerca
-if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    window.filtroRicerca = searchInput.value.toLowerCase().trim();
-    mostraLista();
-  });
-}
-
-if (clearSearchBtn) {
-  clearSearchBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    window.filtroRicerca = '';
-    mostraLista();
-  });
-}
 
 // 1. Caricamento File
 if (fileInput) {
@@ -65,8 +46,6 @@ function processaDatiExcel(rawRows) {
     });
 
   if (globalSegnaBtn) globalSegnaBtn.disabled = false;
-  window.filtroRicerca = '';
-  if (searchInput) searchInput.value = '';
   salvaEVisualizza();
 }
 
@@ -122,8 +101,6 @@ window.ottieniStatiPersona = function(nome) {
   if (pagatiTassa.includes(nome)) statiSet.add('Tassa');
   const assegnatiPosto = JSON.parse(localStorage.getItem('excel_postazioni_assegnate') || '[]');
   if (assegnatiPosto.includes(nome)) statiSet.add('Postazione');
-  const naveDati = JSON.parse(localStorage.getItem('excel_nave_checkin') || '{}');
-  if (naveDati[nome] !== undefined) statiSet.add('Nave');
   const adesioniExtra = JSON.parse(localStorage.getItem('excel_adesioni_evento_extra') || '[]');
   if (adesioniExtra.includes(nome)) statiSet.add('Altro');
   return Array.from(statiSet);
@@ -141,25 +118,7 @@ function mostraLista() {
   let toolbarHtml = window.modoAttivo ? `<div class="toolbar-info"><span>Operazione: <strong>${window.modoAttivo}</strong></span><button onclick="terminaModo()" class="btn-fine">Termina</button></div>` : '';
   const headerHtml = `<div class="list-header"><div class="col-num">#</div><div class="col-nome">Nominativo</div><div class="col-raccolta">Raccolta</div><div class="col-tel">Telefono</div><div class="col-saldo">Saldo</div><div class="col-status-end">Stati</div></div>`;
 
-  const datiFiltrati = window.datiInMemoria.filter(riga => {
-    const nomeOriginale = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
-    const isTotale = nomeOriginale === '' || String(riga['PAX']).includes('###');
-    if (isTotale) return true;
-
-    // Se non c'è filtro, mostra tutto
-    if (!window.filtroRicerca) return true;
-
-    // Filtro per nome o per telefono (utile!)
-    const tel = String(riga['TELEFONO'] || '').toLowerCase();
-    return nomeOriginale.toLowerCase().includes(window.filtroRicerca) || tel.includes(window.filtroRicerca);
-  });
-
-  if (datiFiltrati.length === 0 && window.filtroRicerca) {
-    listaDatiEl.innerHTML = toolbarHtml + headerHtml + `<div style="text-align:center; padding:40px; color:#64748b;"> Nessun risultato per "<strong>${window.filtroRicerca}</strong>"</div>`;
-    return;
-  }
-
-  const rowsHtml = datiFiltrati.map((riga, index) => {
+  const rowsHtml = window.datiInMemoria.map((riga, index) => {
     const nomeOriginale = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
     const isTotale = nomeOriginale === '' || String(riga['PAX']).includes('###');
     const stati = window.ottieniStatiPersona(nomeOriginale || riga['PAX']);
@@ -208,14 +167,13 @@ window.apriDaElenchi = function(tipo) {
   if (tipo === 'pagamenti' && typeof apriPagamenti === 'function') apriPagamenti();
   if (tipo === 'tassa' && typeof apriTassaGestione === 'function') apriTassaGestione();
   if (tipo === 'postazioni' && typeof apriPostazioniGestione === 'function') apriPostazioniGestione();
-  if (tipo === 'nave' && typeof apriNaveGestione === 'function') apriNaveGestione();
   if (tipo === 'altro' && typeof apriAltroEvento === 'function') apriAltroEvento();
 };
 
 window.chiudiElenchiExtraModal = function() { document.getElementById('elenchiExtraModal').classList.remove('active'); };
 
 const tempResetBtn = document.getElementById('tempResetBtn');
-if (tempResetBtn) tempResetBtn.addEventListener('click', () => { if (confirm('Reset?')) { localStorage.removeItem('excel_stati_persone_v2'); localStorage.removeItem('excel_pagamenti_ricevuti'); localStorage.removeItem('excel_adesioni_evento_extra'); localStorage.removeItem('excel_tassa_pagata'); localStorage.removeItem('excel_postazioni_assegnate'); localStorage.removeItem('excel_nave_checkin'); location.reload(); } });
+if (tempResetBtn) tempResetBtn.addEventListener('click', () => { if (confirm('Reset?')) { localStorage.removeItem('excel_stati_persone_v2'); localStorage.removeItem('excel_pagamenti_ricevuti'); localStorage.removeItem('excel_adesioni_evento_extra'); localStorage.removeItem('excel_tassa_pagata'); localStorage.removeItem('excel_postazioni_assegnate'); location.reload(); } });
 
 // Logica Telefono
 const phoneModal = document.getElementById('phoneModal');

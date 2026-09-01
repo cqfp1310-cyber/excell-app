@@ -10,15 +10,15 @@ function ottieniNaveDati() {
   return dati ? JSON.parse(dati) : {};
 }
 
-function toggleNave(nome, defaultPax) {
+function toggleNave(nome) {
   let naveDati = ottieniNaveDati();
 
   if (naveDati[nome] !== undefined) {
     // Se è già presente, lo rimuoviamo
     delete naveDati[nome];
   } else {
-    // CHIEDIAMO il numero all'impatto (come richiesto)
-    const input = prompt(`Quanti passeggeri imbarcare per ${nome}?`, defaultPax);
+    // Parte SEMPRE da 1 come richiesto
+    const input = prompt(`Quanti passeggeri imbarcare per ${nome}?`, "1");
     if (input === null) return;
 
     const num = parseInt(input);
@@ -116,7 +116,7 @@ function aggiornaUINave() {
     return `
       <div class="pagamento-item ${isDone ? 'pagato-fatto' : ''}">
         <div class="col-check-pago">
-          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}', ${p.paxPrevisti}); event.stopPropagation();">
+          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}'); event.stopPropagation();">
             ${isDone ? 'IMBARCATO' : 'DA IMBARC.'}
           </button>
         </div>
@@ -130,7 +130,7 @@ function aggiornaUINave() {
           <span style="font-weight:900; font-size:16px; min-width:20px; text-align:center; color:#0f172a;">${numConfermati}</span>
           <button onclick="modificaPaxNave('${p.nome.replace(/'/g, "\\'")}', 1); event.stopPropagation();" style="width:28px; height:28px; border-radius:50%; border:none; background:#f1f5f9; color:#1e293b; font-weight:bold; cursor:pointer;">+</button>
         </div>
-        ` : `<div style="font-size:11px; color:#94a3b8; font-weight:bold; padding-right:5px;">PREV: ${p.paxPrevisti}</div>`}
+        ` : ''}
       </div>
     `;
   }).join('');

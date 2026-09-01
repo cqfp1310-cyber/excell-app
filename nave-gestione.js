@@ -36,6 +36,12 @@ function modificaManualeNave(nome, attuale) {
 
 function apriNaveGestione() {
   window.filtroNave = '';
+  const modal = document.getElementById('naveModal');
+  if (!modal) {
+    alert("Errore: Modal nave non trovato.");
+    return;
+  }
+
   const searchInput = document.getElementById('naveSearchInput');
   if (searchInput) {
     searchInput.value = '';
@@ -44,8 +50,9 @@ function apriNaveGestione() {
       aggiornaUINave();
     };
   }
+
   aggiornaUINave();
-  document.getElementById('naveModal').classList.add('active');
+  modal.classList.add('active');
 }
 
 function aggiornaUINave() {
@@ -91,6 +98,7 @@ function aggiornaUINave() {
   listContainer.innerHTML = passeggeriReali.map(p => {
     const numConfermato = naveDati[p.nome];
     const isDone = numConfermato !== undefined;
+    const nomeEscaped = p.nome.replace(/'/g, "\\'");
 
     return `
       <div class="pagamento-item" style="border-left: 5px solid ${isDone ? '#0ea5e9' : '#e2e8f0'}; margin-bottom:8px; background: ${isDone ? '#f0f9ff' : 'white'};">
@@ -101,11 +109,11 @@ function aggiornaUINave() {
         </div>
         <div style="display:flex; gap:5px;">
           ${!isDone ? `
-            <button onclick="confermaRapidaNave('${p.nome.replace(/'/g, "\\")}', ${p.paxPrevisti})" style="background:#0ea5e9; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">OK ${p.paxPrevisti}</button>
-            <button onclick="modificaManualeNave('${p.nome.replace(/'/g, "\\")}', ${p.paxPrevisti})" style="background:#f1f5f9; border:none; padding:8px; border-radius:6px; cursor:pointer;">✏️</button>
+            <button onclick="confermaRapidaNave('${nomeEscaped}', ${p.paxPrevisti})" style="background:#0ea5e9; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">OK ${p.paxPrevisti}</button>
+            <button onclick="modificaManualeNave('${nomeEscaped}', ${p.paxPrevisti})" style="background:#f1f5f9; border:none; padding:8px; border-radius:6px; cursor:pointer;">✏️</button>
           ` : `
-            <button onclick="cancellaNave('${p.nome.replace(/'/g, "\\")}')" style="background:#ef4444; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">ANNULLA</button>
-            <button onclick="modificaManualeNave('${p.nome.replace(/'/g, "\\")}', ${numConfermato})" style="background:#f1f5f9; border:none; padding:8px; border-radius:6px; cursor:pointer;">✏️</button>
+            <button onclick="cancellaNave('${nomeEscaped}')" style="background:#ef4444; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">ANNULLA</button>
+            <button onclick="modificaManualeNave('${nomeEscaped}', ${numConfermato})" style="background:#f1f5f9; border:none; padding:8px; border-radius:6px; cursor:pointer;">✏️</button>
           `}
         </div>
       </div>
@@ -128,5 +136,6 @@ function aggiornaUINave() {
 }
 
 function chiudiNaveModal() {
-  document.getElementById('naveModal').classList.remove('active');
+  const modal = document.getElementById('naveModal');
+  if (modal) modal.classList.remove('active');
 }

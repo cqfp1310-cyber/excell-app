@@ -10,23 +10,15 @@ function ottieniNaveDati() {
   return dati ? JSON.parse(dati) : {};
 }
 
-function toggleNave(nome, defaultPax) {
+function toggleNave(nome) {
   let naveDati = ottieniNaveDati();
 
   if (naveDati[nome] !== undefined) {
     // Se è già presente, lo rimuoviamo
     delete naveDati[nome];
   } else {
-    // Chiediamo il numero di passeggeri
-    const input = prompt(`Quanti passeggeri imbarcare per ${nome}?`, defaultPax);
-    if (input === null) return;
-
-    const num = parseInt(input);
-    if (isNaN(num) || num < 0) {
-      alert("Inserisci un numero valido.");
-      return;
-    }
-    naveDati[nome] = num;
+    // Segniamo come imbarcato (senza chiedere PAX)
+    naveDati[nome] = true;
   }
 
   localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
@@ -50,24 +42,23 @@ function aggiornaUINave() {
 
   dati.forEach(riga => {
     const nome = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
-    const paxPrevisti = parseInt(riga['PAX']) || 0;
+    const tel = (riga['TELEFONO'] || '').trim();
     const isTotale = !nome || String(riga['PAX']).includes('###');
     const isStaff = nome.toUpperCase().includes('AUTISTA') || nome.toUpperCase().includes('ACCOMPAGNATORE');
 
-    if (nome && !isTotale && !isStaff) {
-      passeggeriReali.push({ nome, paxPrevisti });
+    // Filtriamo: solo chi è presente (chi "si vede")
+    const stati = typeof window.ottieniStatiPersona === 'function' ? window.ottieniStatiPersona(nome) : [];
+    const isPresente = stati.includes('Presenza');
+
+    if (nome && !isTotale && !isStaff && isPresente) {
+      passeggeriReali.push({ nome, tel });
     }
   });
 
   let contImbarcati = 0;
-  let paxTotaliPrevisti = 0;
-  let paxTotaliEffettivi = 0;
-
   passeggeriReali.forEach(p => {
-    paxTotaliPrevisti += p.paxPrevisti;
     if (naveDati[p.nome] !== undefined) {
       contImbarcati++;
-      paxTotaliEffettivi += naveDati[p.nome];
     }
   });
 
@@ -84,34 +75,29 @@ function aggiornaUINave() {
     counterBox.innerHTML = `
       <div style="display:flex; justify-content:space-around; align-items:center; padding:12px; background:#0f172a; color:white; border-radius:12px; margin-bottom:15px; border: 1px solid #334155;">
         <div style="text-align:center;">
-          <span style="color:#22c55e; font-size:20px; font-weight:900;">${paxTotaliEffettivi}</span><br>
-          <small style="color:#94a3b8; font-size:10px; text-transform:uppercase;">PAX A BORDO</small>
+          <span style="color:#22c55e; font-size:20px; font-weight:900;">${contImbarcati}</span><br>
+          <small style="color:#94a3b8; font-size:10px; text-transform:uppercase;">IMBARCATI</small>
         </div>
-        <div style="text-align:center; border-left:1px solid #334155; border-right:1px solid #334155; padding:0 15px;">
-          <span style="color:#e2e8f0; font-size:18px; font-weight:700;">${paxTotaliPrevisti}</span><br>
-          <small style="color:#94a3b8; font-size:10px; text-transform:uppercase;">PAX PREVISTI</small>
-        </div>
-        <div style="text-align:center;">
-          <span style="color:#38bdf8; font-size:20px; font-weight:900;">${contImbarcati}/${passeggeriReali.length}</span><br>
-          <small style="color:#94a3b8; font-size:10px; text-transform:uppercase;">GRUPPI</small>
+        <div style="text-align:center; border-left:1px solid #334155; padding:0 20px;">
+          <span style="color:#e2e8f0; font-size:20px; font-weight:900;">${passeggeriReali.length}</span><br>
+          <small style="color:#94a3b8; font-size:10px; text-transform:uppercase;">TOTALI PRESENTI</small>
         </div>
       </div>
     `;
   }
 
   const html = passeggeriReali.map(p => {
-    const numImbarcati = naveDati[p.nome];
-    const isDone = numImbarcati !== undefined;
+    const isDone = naveDati[p.nome] !== undefined;
     return `
       <div class="pagamento-item ${isDone ? 'pagato-fatto' : ''}">
         <div class="col-check-pago">
-          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}', ${p.paxPrevisti}); event.stopPropagation();">
+          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}'); event.stopPropagation();">
             ${isDone ? 'IMBARCATO' : 'DA IMBARC.'}
           </button>
         </div>
         <div class="pagamento-nome" style="flex:1;">
-          ${p.nome} <span style="font-size:12px; color:#64748b;">(${p.paxPrevisti} PAX)</span>
-          ${isDone ? `<br><small style="color:#059669;">Confermati: <strong>${numImbarcati}</strong></small>` : ''}
+          ${p.nome}
+          <div style="font-size:12px; color:#2563eb; font-weight:bold;">${p.tel || 'Senza telefono'}</div>
         </div>
       </div>
     `;

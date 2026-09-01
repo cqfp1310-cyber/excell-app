@@ -1,10 +1,20 @@
 const STORAGE_KEY = 'excel_data_store';
 window.datiInMemoria = [];
+window.filtroRicerca = '';
 
 const fileInput = document.getElementById('fileInput');
+const searchInput = document.getElementById('searchInput');
 const statusEl = document.getElementById('status');
 const listaDatiEl = document.getElementById('listaDati');
 const globalSegnaBtn = document.getElementById('globalSegnaBtn');
+
+// Listener Ricerca
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    window.filtroRicerca = e.target.value.toLowerCase();
+    mostraLista();
+  });
+}
 
 // 1. Caricamento File
 if (fileInput) {
@@ -46,6 +56,8 @@ function processaDatiExcel(rawRows) {
     });
 
   if (globalSegnaBtn) globalSegnaBtn.disabled = false;
+  window.filtroRicerca = '';
+  if (searchInput) searchInput.value = '';
   salvaEVisualizza();
 }
 
@@ -118,7 +130,14 @@ function mostraLista() {
   let toolbarHtml = window.modoAttivo ? `<div class="toolbar-info"><span>Operazione: <strong>${window.modoAttivo}</strong></span><button onclick="terminaModo()" class="btn-fine">Termina</button></div>` : '';
   const headerHtml = `<div class="list-header"><div class="col-num">#</div><div class="col-nome">Nominativo</div><div class="col-raccolta">Raccolta</div><div class="col-tel">Telefono</div><div class="col-saldo">Saldo</div><div class="col-status-end">Stati</div></div>`;
 
-  const rowsHtml = window.datiInMemoria.map((riga, index) => {
+  const datiFiltrati = window.datiInMemoria.filter(riga => {
+    const nomeOriginale = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
+    const isTotale = nomeOriginale === '' || String(riga['PAX']).includes('###');
+    if (isTotale) return true;
+    return nomeOriginale.toLowerCase().includes(window.filtroRicerca);
+  });
+
+  const rowsHtml = datiFiltrati.map((riga, index) => {
     const nomeOriginale = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
     const isTotale = nomeOriginale === '' || String(riga['PAX']).includes('###');
     const stati = window.ottieniStatiPersona(nomeOriginale || riga['PAX']);

@@ -49,7 +49,18 @@ function mostraElencoTavoli() {
   });
 
   title.textContent = "Elenco Tavoli";
-  listContainer.innerHTML = chiaviOrdinate.map(t => `
+
+  const headerAzioniHtml = `
+    <div id="areaAzioniTavoli" style="margin-bottom:20px; text-align:center; background:#f1f5f9; padding:10px; border-radius:12px;">
+       <button onclick="mostraOpzioniModificaTavoli()" class="btn-choice" style="background:#8b5cf6; color:white; padding:10px; margin-bottom:0; font-size:14px; width:auto; min-width:120px;">Modifica</button>
+       <div id="opzioniModificaArea" style="display:none; margin-top:10px; gap:10px; justify-content:center;">
+          <button class="btn-choice" style="background:#f59e0b; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">Sposta</button>
+          <button class="btn-choice" style="background:#1e293b; color:white; padding:8px 15px; margin-bottom:0; font-size:13px; width:auto;">Switcha</button>
+       </div>
+    </div>
+  `;
+
+  const tavoliHtml = chiaviOrdinate.map(t => `
     <div style="margin-bottom:20px; background:#f8fafc; padding:15px; border-radius:12px; border-left:5px solid #2563eb;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <div style="font-weight:900; font-size:18px; color:#1e293b;">TAVOLO ${t}</div>
@@ -61,7 +72,15 @@ function mostraElencoTavoli() {
     </div>
   `).join('');
 
+  listContainer.innerHTML = headerAzioniHtml + tavoliHtml;
   modal.classList.add('active');
+}
+
+function mostraOpzioniModificaTavoli() {
+  const area = document.getElementById('opzioniModificaArea');
+  if (area) {
+    area.style.display = (area.style.display === 'none' || area.style.display === '') ? 'flex' : 'none';
+  }
 }
 
 function mostraElencoIntolleranze() {

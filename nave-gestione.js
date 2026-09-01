@@ -122,7 +122,7 @@ function aggiornaUINave() {
         </div>
         <div class="pagamento-nome" style="flex:1;">
           ${p.nome}
-          <div style="font-size:12px; color:#2563eb; font-weight:bold;">📞 ${p.tel}</div>
+          <div style="font-size:12px; color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline;" onclick="event.stopPropagation(); if(typeof apriAzioneTelefono === 'function') apriAzioneTelefono('${p.tel}', '${p.nome.replace(/'/g, "\\'")}');">📞 ${p.tel}</div>
         </div>
         ${isDone ? `
         <div style="display:flex; align-items:center; gap:8px; background:white; padding:5px 10px; border-radius:8px; border:1px solid #e2e8f0;">

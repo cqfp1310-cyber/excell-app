@@ -10,6 +10,18 @@ function ottieniNaveDati() {
   return dati ? JSON.parse(dati) : {};
 }
 
+function toggleNave(nome) {
+  let naveDati = ottieniNaveDati();
+  if (naveDati[nome]) {
+    delete naveDati[nome];
+  } else {
+    naveDati[nome] = true;
+  }
+  localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
+  aggiornaUINave();
+  if (typeof mostraLista === 'function') mostraLista();
+}
+
 function apriNaveGestione() {
   aggiornaUINave();
   const modal = document.getElementById('naveModal');
@@ -26,25 +38,65 @@ function aggiornaUINave() {
   if (!listContainer) return;
 
   const dati = window.datiInMemoria || [];
-  let contPasseggeri = 0;
+  const naveDati = ottieniNaveDati();
+
+  let contImbarcati = Object.keys(naveDati).length;
+  let passeggeriConTel = [];
+  let contTotalePasseggeri = 0;
 
   dati.forEach(riga => {
     const nome = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
+    const tel = (riga['TELEFONO'] || riga['TEL'] || '').trim();
     const isTotale = !nome || String(riga['PAX']).includes('###');
     const isStaff = nome.toUpperCase().includes('AUTISTA') || nome.toUpperCase().includes('ACCOMPAGNATORE');
 
     if (nome && !isTotale && !isStaff) {
-      contPasseggeri++;
+      contTotalePasseggeri++;
+      // Aggiungiamo alla lista visuale SOLO se ha il telefono
+      if (tel && tel !== '' && tel !== '—') {
+        passeggeriConTel.push({ nome, tel });
+      }
     }
   });
 
-  listContainer.innerHTML = `
-    <div style="text-align:center; padding:20px;">
-      <div style="background:#f1f5f9; padding:15px; border-radius:12px; border:1px solid #e2e8f0;">
-        <div style="font-size:12px; color:#64748b; font-weight:bold; text-transform:uppercase;">Passeggeri Totali</div>
-        <div style="font-size:32px; font-weight:900; color:#0ea5e9;">${contPasseggeri}</div>
+  // Ordine: Da imbarcare in cima, poi alfabetico
+  passeggeriConTel.sort((a, b) => {
+    const aDone = naveDati[a.nome];
+    const bDone = naveDati[b.nome];
+    if (!aDone && bDone) return -1;
+    if (aDone && !bDone) return 1;
+    return a.nome.localeCompare(b.nome);
+  });
+
+  let counterHtml = `
+    <div style="display:flex; justify-content:space-around; align-items:center; padding:12px; background:#0f172a; color:white; border-radius:12px; margin-bottom:15px; border: 1px solid #334155;">
+      <div style="text-align:center;">
+        <span style="color:#22c55e; font-size:22px; font-weight:900;">${contImbarcati}</span><br>
+        <small style="color:#94a3b8; font-size:10px; text-transform:uppercase;">IMBARCATI</small>
       </div>
-      <p style="margin-top:15px; font-size:14px; color:#64748b;">In attesa di istruzioni per la lista...</p>
+      <div style="text-align:center; border-left:1px solid #334155; padding-left:20px;">
+        <span style="color:#e2e8f0; font-size:22px; font-weight:900;">${contTotalePasseggeri}</span><br>
+        <small style="color:#94a3b8; font-size:10px; text-transform:uppercase;">TOT. PASSEGGERI</small>
+      </div>
     </div>
   `;
+
+  const listHtml = passeggeriConTel.map(p => {
+    const isDone = naveDati[p.nome];
+    return `
+      <div class="pagamento-item ${isDone ? 'pagato-fatto' : ''}">
+        <div class="col-check-pago">
+          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}'); event.stopPropagation();">
+            ${isDone ? 'IMBARCATO' : 'DA IMBARC.'}
+          </button>
+        </div>
+        <div class="pagamento-nome" style="flex:1;">
+          ${p.nome}
+          <div style="font-size:12px; color:#2563eb; font-weight:bold;">📞 ${p.tel}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  listContainer.innerHTML = counterHtml + (listHtml || '<p style="text-align:center; padding:20px; color:#64748b;">Nessun passeggero con telefono trovato.</p>');
 }

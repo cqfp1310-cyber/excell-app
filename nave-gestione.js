@@ -10,20 +10,27 @@ function ottieniNaveDati() {
   return dati ? JSON.parse(dati) : {};
 }
 
-function toggleNave(nome) {
+function toggleNave(nome, defaultPax) {
   let naveDati = ottieniNaveDati();
   if (naveDati[nome] !== undefined) {
     delete naveDati[nome];
   } else {
-    const input = prompt(`Quanti passeggeri imbarcare per ${nome}?`, "1");
-    if (input === null) return;
-    const num = parseInt(input);
-    if (isNaN(num) || num < 0) {
-      alert("Inserisci un numero valido.");
-      return;
-    }
-    naveDati[nome] = num;
+    // Se non c'è, segniamo il numero previsto dal file come base
+    naveDati[nome] = parseInt(defaultPax) || 1;
   }
+  localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
+  aggiornaUINave();
+  if (typeof mostraLista === 'function') mostraLista();
+}
+
+function modificaPaxNave(nome, delta) {
+  let naveDati = ottieniNaveDati();
+  if (naveDati[nome] === undefined) return;
+
+  let nuovoVal = (parseInt(naveDati[nome]) || 0) + delta;
+  if (nuovoVal < 1) nuovoVal = 1;
+
+  naveDati[nome] = nuovoVal;
   localStorage.setItem(NAVE_LOCAL_KEY, JSON.stringify(naveDati));
   aggiornaUINave();
   if (typeof mostraLista === 'function') mostraLista();
@@ -58,19 +65,18 @@ function aggiornaUINave() {
   dati.forEach(riga => {
     const nome = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
     const tel = (riga['TELEFONO'] || riga['TEL'] || '').trim();
+    const paxPrevisti = parseInt(riga['PAX']) || 1;
     const isTotale = !nome || String(riga['PAX']).includes('###');
     const isStaff = nome.toUpperCase().includes('AUTISTA') || nome.toUpperCase().includes('ACCOMPAGNATORE');
 
     if (nome && !isTotale && !isStaff) {
       contTotalePasseggeri++;
-      // Aggiungiamo alla lista visuale SOLO se ha il telefono
       if (tel && tel !== '' && tel !== '—') {
-        passeggeriConTel.push({ nome, tel });
+        passeggeriConTel.push({ nome, tel, paxPrevisti });
       }
     }
   });
 
-  // Ordine: Da imbarcare in cima, poi alfabetico
   passeggeriConTel.sort((a, b) => {
     const aDone = naveDati[a.nome] !== undefined;
     const bDone = naveDati[b.nome] !== undefined;
@@ -95,20 +101,31 @@ function aggiornaUINave() {
   const listHtml = passeggeriConTel.map(p => {
     const numConfermati = naveDati[p.nome];
     const isDone = numConfermati !== undefined;
+
     return `
       <div class="pagamento-item ${isDone ? 'pagato-fatto' : ''}">
         <div class="col-check-pago">
-          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}'); event.stopPropagation();">
+          <button class="btn-segna-pago ${isDone ? 'is-saldato' : 'is-debito'}" onclick="toggleNave('${p.nome.replace(/'/g, "\\'")}', ${p.paxPrevisti}); event.stopPropagation();">
             ${isDone ? 'IMBARCATO' : 'DA IMBARC.'}
           </button>
         </div>
         <div class="pagamento-nome" style="flex:1;">
-          ${p.nome} ${isDone ? `<span style="color:#059669; font-weight:bold;">(+${numConfermati})</span>` : ''}
+          ${p.nome}
           <div style="font-size:12px; color:#2563eb; font-weight:bold;">📞 ${p.tel}</div>
         </div>
+        ${isDone ? `
+        <div style="display:flex; align-items:center; gap:8px; background:white; padding:5px 10px; border-radius:8px; border:1px solid #e2e8f0;">
+          <button onclick="modificaPaxNave('${p.nome.replace(/'/g, "\\'")}', -1); event.stopPropagation();" style="width:28px; height:28px; border-radius:50%; border:none; background:#f1f5f9; color:#1e293b; font-weight:bold; cursor:pointer;">-</button>
+          <span style="font-weight:900; font-size:16px; min-width:20px; text-align:center; color:#0f172a;">${numConfermati}</span>
+          <button onclick="modificaPaxNave('${p.nome.replace(/'/g, "\\'")}', 1); event.stopPropagation();" style="width:28px; height:28px; border-radius:50%; border:none; background:#f1f5f9; color:#1e293b; font-weight:bold; cursor:pointer;">+</button>
+        </div>
+        ` : `<div style="font-size:11px; color:#94a3b8; font-weight:bold; padding-right:5px;">PREV: ${p.paxPrevisti}</div>`}
       </div>
     `;
   }).join('');
+
+  listContainer.innerHTML = counterHtml + (listHtml || '<p style="text-align:center; padding:20px; color:#64748b;">Nessun passeggero con telefono trovato.</p>');
+}
 
   listContainer.innerHTML = counterHtml + (listHtml || '<p style="text-align:center; padding:20px; color:#64748b;">Nessun passeggero con telefono trovato.</p>');
 }

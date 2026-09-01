@@ -127,6 +127,7 @@
       <h3>Gestione Elenchi</h3>
       <p style="font-size:13px; color:#64748b; margin-bottom:15px;">Scegli quale elenco gestire.</p>
       <div class="modal-buttons">
+        <button onclick="apriDaElenchi('nave')" class="btn-choice" style="background:#0ea5e9; color:white;">Gestione Nave</button>
         <button onclick="apriDaElenchi('pagamenti')" class="btn-choice" style="background:#059669; color:white;">Pagamenti (Saldi)</button>
         <button onclick="apriDaElenchi('tassa')" class="btn-choice" style="background:#8b5cf6; color:white;">Riscossione Tassa</button>
         <button onclick="apriDaElenchi('postazioni')" class="btn-choice" style="background:#f59e0b; color:white;">Postazioni</button>
@@ -177,6 +178,17 @@
     </div>
   </div>
 
+  <!-- Modal Nave -->
+  <div id="naveModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3>🚢 Gestione Nave</h3>
+      <div id="naveList" class="mancanti-scroll-list">
+        <p style="text-align:center; padding:20px;">Qui apparirà la lista imbarco...</p>
+      </div>
+      <button onclick="chiudiNaveModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
   <!-- Script nell'ordine corretto -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.1/dist/xlsx.full.min.js"></script>
   <script src="segna-presenze.js"></script>
@@ -186,6 +198,7 @@
   <script src="altro-evento.js"></script>
   <script src="tassa-gestione.js"></script>
   <script src="postazioni-gestione.js"></script>
+  <script src="nave-gestione.js"></script>
   <script src="esportazione.js"></script>
   <script src="app.js"></script>
 </body>

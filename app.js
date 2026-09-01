@@ -181,6 +181,7 @@ if (btnElenchiExtra) {
 
 window.apriDaElenchi = function(tipo) {
   chiudiElenchiExtraModal();
+  if (tipo === 'nave' && typeof apriNaveGestione === 'function') apriNaveGestione();
   if (tipo === 'pagamenti' && typeof apriPagamenti === 'function') apriPagamenti();
   if (tipo === 'tassa' && typeof apriTassaGestione === 'function') apriTassaGestione();
   if (tipo === 'postazioni' && typeof apriPostazioniGestione === 'function') apriPostazioniGestione();

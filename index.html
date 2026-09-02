@@ -19,6 +19,7 @@
         <button id="btnRistorazione" style="background:#f59e0b; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Ristorazione</button>
         <button id="btnElenchiExtra" style="background:#8b5cf6; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Gestione Elenchi</button>
         <button id="btnEsportaEsterno" onclick="apriMenuEsportazione()" style="background:#10b981; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Salva / PDF</button>
+        <button id="btnRubrica" onclick="apriRubrica()" style="background:#0ea5e9; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">📖 Rubrica</button>
         <button id="tempResetBtn" style="background:#ef4444; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Reset</button>
       </div>
 
@@ -192,6 +193,21 @@
     </div>
   </div>
 
+  <!-- Modal Rubrica -->
+  <div id="rubricaModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3>📖 Rubrica Personale</h3>
+      <div id="rubricaCounter"></div>
+      <button onclick="aggiungiContattoRubrica()" class="btn-choice" style="background:#22c55e; color:white; margin-bottom:20px;">
+        ➕ Aggiungi Contatto
+      </button>
+      <div id="rubricaList" class="mancanti-scroll-list">
+        <!-- Lista contatti fissi -->
+      </div>
+      <button onclick="chiudiRubricaModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
   <!-- Script nell'ordine corretto -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.1/dist/xlsx.full.min.js"></script>
   <script src="segna-presenze.js"></script>
@@ -202,6 +218,7 @@
   <script src="tassa-gestione.js"></script>
   <script src="postazioni-gestione.js"></script>
   <script src="nave-gestione.js"></script>
+  <script src="rubrica.js"></script>
   <script src="esportazione.js"></script>
   <script src="app.js"></script>
 </body>

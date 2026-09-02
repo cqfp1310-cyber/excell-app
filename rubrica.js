@@ -73,9 +73,12 @@ function aggiornaUIRubrica() {
       <div class="pagamento-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #f1f5f9; background:white; border-radius:10px; margin-bottom:8px; border:1px solid #e2e8f0;">
         <div style="flex:1;">
           <div style="font-weight:900; font-size:16px; color:#1e293b;">${c.nome}</div>
-          <div style="color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline; font-size:14px; margin-top:3px;" onclick="event.stopPropagation(); if(typeof apriAzioneTelefono === 'function') apriAzioneTelefono('${c.tel}', '${c.nome.replace(/'/g, "\\'")}');">📞 ${c.tel}</div>
+          <div style="color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline; font-size:15px; margin-top:5px; display:inline-block;"
+               onclick="event.stopPropagation(); window.apriAzioneTelefono('${c.tel}', '${c.nome.replace(/'/g, "\\'")}');">
+            📞 ${c.tel}
+          </div>
         </div>
-        <button onclick="rimuoviContattoRubrica(${c.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">ELIMINA</button>
+        <button onclick="rimuoviContattoRubrica(${c.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">ELIMINA</button>
       </div>
     `).join('');
   }

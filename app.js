@@ -197,12 +197,12 @@ if (tempResetBtn) tempResetBtn.addEventListener('click', () => { if (confirm('Re
 const phoneModal = document.getElementById('phoneModal');
 const modalTitle = document.getElementById('modalTitle');
 let numeroSalvato = '';
-function apriAzioneTelefono(tel, nome) {
+window.apriAzioneTelefono = function(tel, nome) {
   if (!tel || tel === '—' || tel === '' || tel === 'undefined') return;
   numeroSalvato = String(tel).replace(/\s+/g, '');
   modalTitle.textContent = nome;
   if(phoneModal) phoneModal.classList.add('active');
-}
+};
 document.getElementById('btnWhatsapp').addEventListener('click', () => { window.open(`https://wa.me/${numeroSalvato}`, '_blank'); chiudiPhoneModal(); });
 document.getElementById('btnCall').addEventListener('click', () => { window.location.href = `tel:${numeroSalvato}`; chiudiPhoneModal(); });
 document.getElementById('btnCancel').addEventListener('click', chiudiPhoneModal);

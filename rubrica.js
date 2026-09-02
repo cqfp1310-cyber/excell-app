@@ -3,7 +3,8 @@
  * Gestione Rubrica Personale Indipendente
  */
 
-const RUBRICA_LOCAL_KEY = 'excel_rubrica_fissa';
+const RUBRICA_LOCAL_KEY = 'excel_rubrica_fissa_v2';
+let filtroRubricaAttivo = 'TUTTI';
 
 function ottieniRubrica() {
   const dati = localStorage.getItem(RUBRICA_LOCAL_KEY);
@@ -17,10 +18,17 @@ function aggiungiContattoRubrica() {
   const tel = prompt("Inserisci il Numero di Telefono:");
   if (tel === null) return;
 
+  const catScelta = prompt("Scegli categoria:\n1. LIDO\n2. ALBERGO\n3. AGENZIA\n4. SPECIAL", "1");
+  let categoria = "LIDO";
+  if (catScelta === "2") categoria = "ALBERGO";
+  if (catScelta === "3") categoria = "AGENZIA";
+  if (catScelta === "4") categoria = "SPECIAL";
+
   let rubrica = ottieniRubrica();
   rubrica.push({
     nome: nome.trim(),
     tel: tel.trim().replace(/\s+/g, ''),
+    categoria: categoria,
     id: Date.now()
   });
 
@@ -37,7 +45,13 @@ function rimuoviContattoRubrica(id) {
   }
 }
 
+function impostaFiltroRubrica(cat) {
+  filtroRubricaAttivo = cat;
+  aggiornaUIRubrica();
+}
+
 function apriRubrica() {
+  filtroRubricaAttivo = 'TUTTI';
   aggiornaUIRubrica();
   const modal = document.getElementById('rubricaModal');
   if (modal) modal.classList.add('active');
@@ -53,33 +67,51 @@ function aggiornaUIRubrica() {
   const counterBox = document.getElementById('rubricaCounter');
   if (!listContainer) return;
 
-  const rubrica = ottieniRubrica();
+  let rubrica = ottieniRubrica();
 
   if (counterBox) {
     counterBox.innerHTML = `
-      <div style="background:#0f172a; color:white; padding:10px; border-radius:10px; margin-bottom:15px; text-align:center;">
-        <span style="font-size:18px; font-weight:900; color:#38bdf8;">${rubrica.length}</span> Contatti salvati
+      <div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:15px;">
+        <button onclick="impostaFiltroRubrica('TUTTI')" style="background:${filtroRubricaAttivo === 'TUTTI' ? '#1e293b' : '#94a3b8'}; color:white; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">TUTTI</button>
+        <button onclick="impostaFiltroRubrica('LIDO')" style="background:${filtroRubricaAttivo === 'LIDO' ? '#f59e0b' : '#94a3b8'}; color:white; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">LIDO</button>
+        <button onclick="impostaFiltroRubrica('ALBERGO')" style="background:${filtroRubricaAttivo === 'ALBERGO' ? '#0ea5e9' : '#94a3b8'}; color:white; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">ALBERGO</button>
+        <button onclick="impostaFiltroRubrica('AGENZIA')" style="background:${filtroRubricaAttivo === 'AGENZIA' ? '#10b981' : '#94a3b8'}; color:white; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">AGENZIA</button>
+        <button onclick="impostaFiltroRubrica('SPECIAL')" style="background:${filtroRubricaAttivo === 'SPECIAL' ? '#f97316' : '#94a3b8'}; color:white; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">SPECIAL</button>
       </div>
     `;
   }
 
+  // Applica filtro
+  if (filtroRubricaAttivo !== 'TUTTI') {
+    rubrica = rubrica.filter(c => c.categoria === filtroRubricaAttivo);
+  }
+
   if (rubrica.length === 0) {
-    listContainer.innerHTML = '<p style="text-align:center; padding:30px; color:#64748b; font-style:italic;">La rubrica è vuota.<br>Aggiungi i tuoi contatti fissi.</p>';
+    listContainer.innerHTML = `<p style="text-align:center; padding:30px; color:#64748b; font-style:italic;">Nessun contatto ${filtroRubricaAttivo === 'TUTTI' ? '' : 'in ' + filtroRubricaAttivo}.</p>`;
   } else {
-    // Ordine alfabetico
     rubrica.sort((a, b) => a.nome.localeCompare(b.nome));
 
-    listContainer.innerHTML = rubrica.map(c => `
-      <div class="pagamento-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #f1f5f9; background:white; border-radius:10px; margin-bottom:8px; border:1px solid #e2e8f0;">
-        <div style="flex:1;">
-          <div style="font-weight:900; font-size:16px; color:#1e293b;">${c.nome}</div>
-          <div style="color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline; font-size:15px; margin-top:5px; display:inline-block;"
-               onclick="event.stopPropagation(); window.apriAzioneTelefono('${c.tel}', '${c.nome.replace(/'/g, "\\'")}');">
-            📞 ${c.tel}
+    listContainer.innerHTML = rubrica.map(c => {
+      let badgeColor = "#f59e0b"; // Default Lido
+      if (c.categoria === "ALBERGO") badgeColor = "#0ea5e9";
+      if (c.categoria === "AGENZIA") badgeColor = "#10b981";
+      if (c.categoria === "SPECIAL") badgeColor = "#f97316";
+
+      return `
+        <div class="pagamento-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:white; border-radius:10px; margin-bottom:8px; border:1px solid #e2e8f0; border-left:5px solid ${badgeColor};">
+          <div style="flex:1; text-align:left;">
+            <div style="display:flex; align-items:center; gap:8px;">
+               <div style="font-weight:900; font-size:16px; color:#1e293b;">${c.nome}</div>
+               <span style="font-size:9px; background:${badgeColor}; color:white; padding:1px 6px; border-radius:10px; font-weight:bold;">${c.categoria}</span>
+            </div>
+            <div style="color:#2563eb; font-weight:bold; cursor:pointer; text-decoration:underline; font-size:15px; margin-top:5px; display:inline-block;"
+                 onclick="event.stopPropagation(); window.apriAzioneTelefono('${c.tel}', '${c.nome.replace(/'/g, "\\'")}');">
+              📞 ${c.tel}
+            </div>
           </div>
+          <button onclick="rimuoviContattoRubrica(${c.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">ELIMINA</button>
         </div>
-        <button onclick="rimuoviContattoRubrica(${c.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">ELIMINA</button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 }

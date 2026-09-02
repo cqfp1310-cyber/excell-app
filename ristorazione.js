@@ -222,19 +222,86 @@ function mostraElencoIntolleranze() {
 
   title.textContent = "Intolleranze e Allergie";
 
+  const headerHtml = `
+    <div style="margin-bottom:20px; text-align:center; background:#fef2f2; padding:15px; border-radius:12px; border:1px solid #fee2e2;">
+      <button onclick="gestisciNotaAllergiaExcel()" class="btn-choice" style="background:#ef4444; color:white; padding:10px; width:auto; font-size:14px; margin-bottom:0;">➕ Gestisci Nota Persona</button>
+      <p style="font-size:11px; color:#991b1b; margin-top:8px; font-weight:500;">Modifica allergie per i passeggeri del file attuale.</p>
+    </div>
+  `;
+
   if (personeConNote.length === 0) {
-    listContainer.innerHTML = '<p style="text-align:center; padding:20px; color:#64748b;">Nessuna segnalazione trovata. ✅</p>';
+    listContainer.innerHTML = headerHtml + '<p style="text-align:center; padding:20px; color:#64748b;">Nessuna segnalazione trovata nel file. ✅</p>';
   } else {
-    listContainer.innerHTML = personeConNote.map(p => `
-      <div style="padding:12px; border-bottom:1px solid #eee;">
-        <div style="font-weight:bold; font-size:16px;">${p['NOMINATIVO'] || p['PAX']}</div>
-        <div style="color:#ef4444; font-weight:bold; font-size:14px; margin-top:4px;">⚠️ ${p['ALLERGIE'] || p['NOTE']}</div>
-        <div style="font-size:12px; color:#94a3b8;">Tavolo: ${p['TAVOLO'] || '—'}</div>
-      </div>
-    `).join('');
+    const listHtml = personeConNote.map(p => {
+      const nome = p['NOMINATIVO'] || p['PAX'];
+      const nota = p['ALLERGIE'] || p['NOTE'];
+      return `
+        <div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background:white; border-radius:10px; margin-bottom:8px; border:1px solid #e2e8f0;">
+          <div style="flex:1; text-align:left;">
+            <div style="font-weight:900; font-size:16px; color:#1e293b;">${nome}</div>
+            <div style="color:#ef4444; font-weight:bold; font-size:14px; margin-top:4px;">⚠️ ${nota}</div>
+            <div style="font-size:12px; color:#94a3b8; font-weight:bold;">Tavolo: ${p['TAVOLO'] || '—'}</div>
+          </div>
+          <button onclick="modificaNotaPersonaExcel('${nome.replace(/'/g, "\\'")}')"
+                  style="background:#f1f5f9; color:#64748b; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">MODIFICA</button>
+        </div>
+      `;
+    }).join('');
+    listContainer.innerHTML = headerHtml + listHtml;
   }
 
   modal.classList.add('active');
+}
+
+function gestisciNotaAllergiaExcel() {
+  const nomeCercato = prompt("Inserisci il nome del passeggero (o parte di esso):");
+  if (!nomeCercato) return;
+
+  const nomeUpper = nomeCercato.trim().toUpperCase();
+  const riga = window.datiInMemoria.find(r => {
+    const n = (r['NOMINATIVO'] || riga['PAX'] || '').trim().toUpperCase();
+    return n.includes(nomeUpper);
+  });
+
+  if (!riga) {
+    if (confirm("Passeggero non trovato. Vuoi aggiungerlo come partecipante extra in questo file?")) {
+      const nuovoNome = prompt("Nome completo partecipante extra:", nomeCercato.trim());
+      if (!nuovoNome) return;
+      const nuovaNota = prompt(`Quale allergia/nota vuoi segnare per ${nuovoNome}?`);
+      if (nuovaNota === null) return;
+
+      window.datiInMemoria.push({
+        'NOMINATIVO': nuovoNome.trim(),
+        'ALLERGIE': nuovaNota.trim(),
+        'PAX': '1',
+        'TAVOLO': 'EXTRA',
+        '_idOriginale': Date.now()
+      });
+      salvaEVisualizzaRistorazione();
+    }
+  } else {
+    modificaNotaPersonaExcel(riga['NOMINATIVO'] || riga['PAX']);
+  }
+}
+
+function modificaNotaPersonaExcel(nome) {
+  const riga = window.datiInMemoria.find(r => (r['NOMINATIVO'] || r['PAX']) === nome);
+  if (!riga) return;
+
+  const notaAttuale = riga['ALLERGIE'] || riga['NOTE'] || "";
+  const nuovaNota = prompt(`Modifica nota per ${nome}: (lascia vuoto per cancellare)`, notaAttuale);
+  if (nuovaNota === null) return;
+
+  riga['ALLERGIE'] = nuovaNota.trim();
+  riga['NOTE'] = nuovaNota.trim();
+
+  salvaEVisualizzaRistorazione();
+}
+
+function salvaEVisualizzaRistorazione() {
+  localStorage.setItem('excel_data_store', JSON.stringify(window.datiInMemoria));
+  mostraElencoIntolleranze();
+  if (typeof mostraLista === 'function') mostraLista();
 }
 
 function chiudiRistorazioneChoiceModal() {

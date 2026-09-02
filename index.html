@@ -20,6 +20,7 @@
         <button id="btnElenchiExtra" style="background:#8b5cf6; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Gestione Elenchi</button>
         <button id="btnEsportaEsterno" onclick="apriMenuEsportazione()" style="background:#10b981; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Salva / PDF</button>
         <button id="btnRubrica" onclick="apriRubrica()" style="background:#0ea5e9; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">📖 Rubrica</button>
+        <button id="btnNote" onclick="apriNote()" style="background:#f59e0b; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">📝 Note</button>
         <button id="tempResetBtn" style="background:#ef4444; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">Reset</button>
       </div>
 
@@ -245,6 +246,35 @@
     </div>
   </div>
 
+  <!-- Modal Note -->
+  <div id="noteModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+      <h3>📝 Blocco Note Personale</h3>
+      <button onclick="aggiungiNuovaNota()" class="btn-choice" style="background:#22c55e; color:white; margin-bottom:20px;">
+        ➕ Nuova Nota
+      </button>
+      <div id="noteList" class="mancanti-scroll-list" style="max-height: 450px;">
+        <!-- Lista note -->
+      </div>
+      <button onclick="chiudiNoteModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Modal Edit Nota -->
+  <div id="noteEditModal" class="modal-overlay" style="z-index: 2300;">
+    <div class="modal-content" style="max-width: 400px;">
+      <h3 id="noteEditTitle">Nuova Nota</h3>
+      <input id="editNotaTitolo" type="text" placeholder="Titolo (opzionale)" style="width:100%; padding:12px; margin-bottom:12px; border-radius:10px; border:1px solid #cbd5e1; outline:none; font-weight:bold;" />
+      <textarea id="editNotaTesto" placeholder="Scrivi qui la tua nota..." style="width:100%; height:150px; padding:12px; margin-bottom:20px; border-radius:10px; border:1px solid #cbd5e1; outline:none; resize:none; font-family:inherit;"></textarea>
+
+      <div class="modal-buttons">
+        <button onclick="salvaNota()" class="btn-choice" style="background:#22c55e; color:white;">Salva</button>
+        <button onclick="eliminaNota()" class="btn-choice" style="background:#ef4444; color:white;">Elimina</button>
+        <button onclick="chiudiEditNotaModal()" class="btn-choice btn-cancel">Annulla</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Script nell'ordine corretto -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.1/dist/xlsx.full.min.js"></script>
   <script src="segna-presenze.js"></script>
@@ -256,6 +286,7 @@
   <script src="postazioni-gestione.js"></script>
   <script src="nave-gestione.js"></script>
   <script src="rubrica.js"></script>
+  <script src="note-gestione.js"></script>
   <script src="esportazione.js"></script>
   <script src="app.js"></script>
 </body>

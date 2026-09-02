@@ -198,13 +198,27 @@
     <div class="modal-content" style="max-width: 450px;">
       <h3>📖 Rubrica Personale</h3>
       <div id="rubricaCounter"></div>
-      <button onclick="aggiungiContattoRubrica()" class="btn-choice" style="background:#22c55e; color:white; margin-bottom:20px;">
+      <button onclick="apriSceltaCategoriaRubrica()" class="btn-choice" style="background:#22c55e; color:white; margin-bottom:20px;">
         ➕ Aggiungi Contatto
       </button>
       <div id="rubricaList" class="mancanti-scroll-list">
         <!-- Lista contatti fissi -->
       </div>
       <button onclick="chiudiRubricaModal()" class="btn-choice btn-cancel" style="margin-top:15px;">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- Modal Scelta Categoria Rubrica -->
+  <div id="rubricaCategoriaModal" class="modal-overlay" style="z-index: 2100;">
+    <div class="modal-content">
+      <h3>Scegli Categoria</h3>
+      <div class="modal-buttons">
+        <button onclick="aggiungiContattoConCategoria('LIDO')" class="btn-choice" style="background:#f59e0b; color:white;">LIDO</button>
+        <button onclick="aggiungiContattoConCategoria('ALBERGO')" class="btn-choice" style="background:#0ea5e9; color:white;">ALBERGO</button>
+        <button onclick="aggiungiContattoConCategoria('AGENZIA')" class="btn-choice" style="background:#10b981; color:white;">AGENZIA</button>
+        <button onclick="aggiungiContattoConCategoria('SPECIAL')" class="btn-choice" style="background:#f97316; color:white;">SPECIAL</button>
+        <button onclick="chiudiSceltaCategoriaRubrica()" class="btn-choice btn-cancel">Annulla</button>
+      </div>
     </div>
   </div>
 

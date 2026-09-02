@@ -11,18 +11,24 @@ function ottieniRubrica() {
   return dati ? JSON.parse(dati) : [];
 }
 
-function aggiungiContattoRubrica() {
-  const nome = prompt("Inserisci il Nome:");
+function apriSceltaCategoriaRubrica() {
+  const modal = document.getElementById('rubricaCategoriaModal');
+  if (modal) modal.classList.add('active');
+}
+
+function chiudiSceltaCategoriaRubrica() {
+  const modal = document.getElementById('rubricaCategoriaModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function aggiungiContattoConCategoria(categoria) {
+  chiudiSceltaCategoriaRubrica();
+
+  const nome = prompt(`Inserisci il Nome per la categoria ${categoria}:`);
   if (!nome) return;
 
-  const tel = prompt("Inserisci il Numero di Telefono:");
+  const tel = prompt(`Inserisci il Numero di Telefono per ${nome}:`);
   if (tel === null) return;
-
-  const catScelta = prompt("Scegli categoria:\n1. LIDO\n2. ALBERGO\n3. AGENZIA\n4. SPECIAL", "1");
-  let categoria = "LIDO";
-  if (catScelta === "2") categoria = "ALBERGO";
-  if (catScelta === "3") categoria = "AGENZIA";
-  if (catScelta === "4") categoria = "SPECIAL";
 
   let rubrica = ottieniRubrica();
   rubrica.push({

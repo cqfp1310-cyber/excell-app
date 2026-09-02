@@ -1,10 +1,11 @@
 /**
  * File: rubrica.js
- * Gestione Rubrica Personale Indipendente
+ * Gestione Rubrica Personale Indipendente con Modifica
  */
 
 const RUBRICA_LOCAL_KEY = 'excel_rubrica_fissa_v2';
 let filtroRubricaAttivo = 'TUTTI';
+let contattoInModificaId = null;
 
 function ottieniRubrica() {
   const dati = localStorage.getItem(RUBRICA_LOCAL_KEY);
@@ -42,12 +43,60 @@ function aggiungiContattoConCategoria(categoria) {
   aggiornaUIRubrica();
 }
 
-function rimuoviContattoRubrica(id) {
-  if (confirm("Vuoi eliminare definitivamente questo contatto dalla rubrica?")) {
-    let rubrica = ottieniRubrica();
-    rubrica = rubrica.filter(c => c.id !== id);
+function apriModificaContatto(id) {
+  const rubrica = ottieniRubrica();
+  const contatto = rubrica.find(c => c.id === id);
+  if (!contatto) return;
+
+  contattoInModificaId = id;
+  document.getElementById('editRubricaNome').value = contatto.nome;
+  document.getElementById('editRubricaTel').value = contatto.tel;
+  document.getElementById('editRubricaCat').value = contatto.categoria;
+
+  const modal = document.getElementById('rubricaEditModal');
+  if (modal) modal.classList.add('active');
+}
+
+function chiudiModificaContatto() {
+  contattoInModificaId = null;
+  const modal = document.getElementById('rubricaEditModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function salvaModificaContatto() {
+  if (!contattoInModificaId) return;
+
+  const nuovoNome = document.getElementById('editRubricaNome').value.trim();
+  const nuovoTel = document.getElementById('editRubricaTel').value.trim().replace(/\s+/g, '');
+  const nuovaCat = document.getElementById('editRubricaCat').value;
+
+  if (!nuovoNome) {
+    alert("Il nome è obbligatorio.");
+    return;
+  }
+
+  let rubrica = ottieniRubrica();
+  const index = rubrica.findIndex(c => c.id === contattoInModificaId);
+
+  if (index !== -1) {
+    rubrica[index].nome = nuovoNome;
+    rubrica[index].tel = nuovoTel;
+    rubrica[index].categoria = nuovaCat;
+
     localStorage.setItem(RUBRICA_LOCAL_KEY, JSON.stringify(rubrica));
     aggiornaUIRubrica();
+    chiudiModificaContatto();
+  }
+}
+
+function confermaEliminaRubrica() {
+  if (!contattoInModificaId) return;
+  if (confirm("Vuoi eliminare definitivamente questo contatto dalla rubrica?")) {
+    let rubrica = ottieniRubrica();
+    rubrica = rubrica.filter(c => c.id !== contattoInModificaId);
+    localStorage.setItem(RUBRICA_LOCAL_KEY, JSON.stringify(rubrica));
+    aggiornaUIRubrica();
+    chiudiModificaContatto();
   }
 }
 
@@ -87,7 +136,6 @@ function aggiornaUIRubrica() {
     `;
   }
 
-  // Applica filtro
   if (filtroRubricaAttivo !== 'TUTTI') {
     rubrica = rubrica.filter(c => c.categoria === filtroRubricaAttivo);
   }
@@ -98,7 +146,7 @@ function aggiornaUIRubrica() {
     rubrica.sort((a, b) => a.nome.localeCompare(b.nome));
 
     listContainer.innerHTML = rubrica.map(c => {
-      let badgeColor = "#f59e0b"; // Default Lido
+      let badgeColor = "#f59e0b";
       if (c.categoria === "ALBERGO") badgeColor = "#0ea5e9";
       if (c.categoria === "AGENZIA") badgeColor = "#10b981";
       if (c.categoria === "SPECIAL") badgeColor = "#f97316";
@@ -115,7 +163,7 @@ function aggiornaUIRubrica() {
               📞 ${c.tel}
             </div>
           </div>
-          <button onclick="rimuoviContattoRubrica(${c.id})" style="background:#fee2e2; color:#ef4444; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">ELIMINA</button>
+          <button onclick="apriModificaContatto(${c.id})" style="background:#f1f5f9; color:#64748b; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">MODIFICA</button>
         </div>
       `;
     }).join('');

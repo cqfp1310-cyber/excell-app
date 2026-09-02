@@ -222,6 +222,29 @@
     </div>
   </div>
 
+  <!-- Modal Modifica Contatto Rubrica -->
+  <div id="rubricaEditModal" class="modal-overlay" style="z-index: 2200;">
+    <div class="modal-content">
+      <h3>Modifica Contatto</h3>
+      <input id="editRubricaNome" type="text" placeholder="Nome" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #cbd5e1;" />
+      <input id="editRubricaTel" type="text" placeholder="Telefono" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #cbd5e1;" />
+
+      <p style="font-size:12px; color:#64748b; margin-bottom:5px; text-align:left;">Categoria:</p>
+      <select id="editRubricaCat" style="width:100%; padding:10px; margin-bottom:20px; border-radius:8px; border:1px solid #cbd5e1;">
+        <option value="LIDO">LIDO</option>
+        <option value="ALBERGO">ALBERGO</option>
+        <option value="AGENZIA">AGENZIA</option>
+        <option value="SPECIAL">SPECIAL</option>
+      </select>
+
+      <div class="modal-buttons">
+        <button onclick="salvaModificaContatto()" class="btn-choice" style="background:#22c55e; color:white;">Salva Modifiche</button>
+        <button onclick="confermaEliminaRubrica()" class="btn-choice" style="background:#ef4444; color:white;">Elimina Contatto</button>
+        <button onclick="chiudiModificaContatto()" class="btn-choice btn-cancel">Annulla</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Script nell'ordine corretto -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.1/dist/xlsx.full.min.js"></script>
   <script src="segna-presenze.js"></script>

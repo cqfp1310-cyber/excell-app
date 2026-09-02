@@ -254,34 +254,39 @@ function mostraElencoIntolleranze() {
 }
 
 function gestisciNotaAllergiaExcel() {
-  const nomeCercato = prompt("Inserisci il nome del passeggero (o parte di esso):");
-  if (!nomeCercato) return;
+  const listContainer = document.getElementById('ristorazioneResultList');
+  const title = document.getElementById('ristorazioneResultTitle');
+  if (!listContainer) return;
 
-  const nomeUpper = nomeCercato.trim().toUpperCase();
-  const riga = window.datiInMemoria.find(r => {
-    const n = (r['NOMINATIVO'] || riga['PAX'] || '').trim().toUpperCase();
-    return n.includes(nomeUpper);
-  });
+  title.textContent = "Seleziona Passeggero";
 
-  if (!riga) {
-    if (confirm("Passeggero non trovato. Vuoi aggiungerlo come partecipante extra in questo file?")) {
-      const nuovoNome = prompt("Nome completo partecipante extra:", nomeCercato.trim());
-      if (!nuovoNome) return;
-      const nuovaNota = prompt(`Quale allergia/nota vuoi segnare per ${nuovoNome}?`);
-      if (nuovaNota === null) return;
+  const dati = typeof window.datiInMemoria !== 'undefined' ? window.datiInMemoria : [];
 
-      window.datiInMemoria.push({
-        'NOMINATIVO': nuovoNome.trim(),
-        'ALLERGIE': nuovaNota.trim(),
-        'PAX': '1',
-        'TAVOLO': 'EXTRA',
-        '_idOriginale': Date.now()
-      });
-      salvaEVisualizzaRistorazione();
-    }
-  } else {
-    modificaNotaPersonaExcel(riga['NOMINATIVO'] || riga['PAX']);
-  }
+  // Estraiamo tutti i passeggeri (escluso staff e righe totali)
+  let tuttiNomi = dati.filter(riga => {
+    const nome = (riga['NOMINATIVO'] || riga['PAX'] || '').trim();
+    const isTotale = !nome || String(riga['PAX']).includes('###');
+    const isStaff = nome.toUpperCase().includes('AUTISTA') || nome.toUpperCase().includes('ACCOMPAGNATORE');
+    return nome && !isTotale && !isStaff;
+  }).map(r => r['NOMINATIVO'] || r['PAX']);
+
+  // Rimuoviamo duplicati e ordiniamo in alfabeto
+  tuttiNomi = [...new Set(tuttiNomi)].sort((a, b) => a.localeCompare(b));
+
+  const headerHtml = `
+    <div style="margin-bottom:15px; text-align:center;">
+      <button onclick="mostraElencoIntolleranze()" class="btn-choice btn-cancel" style="padding:10px; width:auto; font-size:13px; margin-bottom:0;">⬅️ Torna Indietro</button>
+    </div>
+  `;
+
+  const listHtml = tuttiNomi.map(nome => `
+    <div onclick="modificaNotaPersonaExcel('${nome.replace(/'/g, "\\'")}')"
+         style="padding:12px; background:white; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:5px; cursor:pointer; font-weight:600; text-align:left; transition:background 0.2s;">
+      👤 ${nome}
+    </div>
+  `).join('');
+
+  listContainer.innerHTML = headerHtml + listHtml;
 }
 
 function modificaNotaPersonaExcel(nome) {
